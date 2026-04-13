@@ -63,3 +63,11 @@ npm run dev
 
 - `notebooks/Apriori_Experiment.ipynb`
 - `notebooks/Demo_Sidang_Apriori.ipynb`
+
+## Jalankan Notebook untuk Client
+
+- Script cepat Windows:
+- `client/start_notebook_client.bat`
+- `client/start_notebook_client.ps1`
+- Panduan:
+- `docs/client/Panduan_Client_Notebook.md`

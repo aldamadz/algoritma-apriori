@@ -1,0 +1,28 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: apriori-backend
+    environment:
+      APP_NAME: "Apriori Engine API"
+      APP_ENV: "production"
+      DEBUG: "false"
+      DATABASE_URL: "postgresql+psycopg://marison:marison123@host.docker.internal:5435/apriori_db"
+      CORS_ORIGINS: "http://192.168.88.246:18080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "18000:8000"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: apriori-frontend
+    depends_on:
+      - backend
+    ports:
+      - "18080:80"
+    restart: unless-stopped

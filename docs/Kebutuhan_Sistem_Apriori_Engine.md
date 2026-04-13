@@ -125,12 +125,22 @@ Untuk filter tampilan hasil:
 Service Docker Compose:
 - `frontend` (Nginx + static Vite build)
 - `backend` (FastAPI)
-- `postgres` (PostgreSQL)
+- `postgres` (PostgreSQL) untuk mode lokal
+
+Catatan mode server:
+- tersedia file `docker-compose.server.yml`
+- backend menggunakan PostgreSQL existing container/host
 
 Command:
 
 ```bat
 docker compose up -d --build
+```
+
+Command mode server:
+
+```bat
+docker compose -f docker-compose.server.yml up -d --build
 ```
 
 ## 11. Batasan Sistem Saat Ini

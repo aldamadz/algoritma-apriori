@@ -18,7 +18,13 @@ docker compose ps
 Service yang harus `Up`:
 - `apriori-frontend`
 - `apriori-backend`
-- `apriori-postgres`
+- `apriori-postgres` (mode lokal)
+
+Jika mode server menggunakan DB existing:
+
+```bat
+docker compose -f docker-compose.server.yml up -d --build
+```
 
 ## 3. Data CSV Import
 

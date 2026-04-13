@@ -43,7 +43,7 @@ Hasil aturan dipakai sebagai dasar rekomendasi pengadaan dan evaluasi koleksi."
 ## E. Checklist Sebelum Presentasi
 
 - Data demo siap (1000/5000 transaksi atau data riil).
-- Sistem web berjalan (`frontend/backend/postgres` up).
+- Sistem web berjalan (`frontend/backend` up, DB sesuai mode lokal/server).
 - Minimal 2 run tersedia untuk demo compare.
 - Top rules sudah dipahami interpretasinya.
 - Notebook dapat dibuka jika diperlukan lampiran eksperimen.
