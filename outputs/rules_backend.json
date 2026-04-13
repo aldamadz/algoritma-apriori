@@ -1,0 +1,248 @@
+{
+  "summary": {
+    "frequent_itemsets_count": 14,
+    "association_rules_count": 19,
+    "min_support": 0.3,
+    "min_confidence": 0.6,
+    "min_lift": 0.0
+  },
+  "association_rules": [
+    {
+      "antecedent": [
+        "Buku_SQL"
+      ],
+      "consequent": [
+        "SI"
+      ],
+      "support": 0.333333,
+      "confidence": 1.0,
+      "lift": 3.0,
+      "support_count": 2
+    },
+    {
+      "antecedent": [
+        "SI"
+      ],
+      "consequent": [
+        "Buku_SQL"
+      ],
+      "support": 0.333333,
+      "confidence": 1.0,
+      "lift": 3.0,
+      "support_count": 2
+    },
+    {
+      "antecedent": [
+        "Buku_SQL"
+      ],
+      "consequent": [
+        "Buku_DB",
+        "SI"
+      ],
+      "support": 0.333333,
+      "confidence": 1.0,
+      "lift": 3.0,
+      "support_count": 2
+    },
+    {
+      "antecedent": [
+        "SI"
+      ],
+      "consequent": [
+        "Buku_DB",
+        "Buku_SQL"
+      ],
+      "support": 0.333333,
+      "confidence": 1.0,
+      "lift": 3.0,
+      "support_count": 2
+    },
+    {
+      "antecedent": [
+        "Buku_DB",
+        "Buku_SQL"
+      ],
+      "consequent": [
+        "SI"
+      ],
+      "support": 0.333333,
+      "confidence": 1.0,
+      "lift": 3.0,
+      "support_count": 2
+    },
+    {
+      "antecedent": [
+        "Buku_DB",
+        "SI"
+      ],
+      "consequent": [
+        "Buku_SQL"
+      ],
+      "support": 0.333333,
+      "confidence": 1.0,
+      "lift": 3.0,
+      "support_count": 2
+    },
+    {
+      "antecedent": [
+        "Buku_SQL"
+      ],
+      "consequent": [
+        "Buku_DB"
+      ],
+      "support": 0.333333,
+      "confidence": 1.0,
+      "lift": 2.0,
+      "support_count": 2
+    },
+    {
+      "antecedent": [
+        "SI"
+      ],
+      "consequent": [
+        "Buku_DB"
+      ],
+      "support": 0.333333,
+      "confidence": 1.0,
+      "lift": 2.0,
+      "support_count": 2
+    },
+    {
+      "antecedent": [
+        "Buku_SQL",
+        "SI"
+      ],
+      "consequent": [
+        "Buku_DB"
+      ],
+      "support": 0.333333,
+      "confidence": 1.0,
+      "lift": 2.0,
+      "support_count": 2
+    },
+    {
+      "antecedent": [
+        "Buku_DB"
+      ],
+      "consequent": [
+        "Buku_SQL"
+      ],
+      "support": 0.333333,
+      "confidence": 0.666667,
+      "lift": 2.0,
+      "support_count": 2
+    },
+    {
+      "antecedent": [
+        "Buku_DB"
+      ],
+      "consequent": [
+        "SI"
+      ],
+      "support": 0.333333,
+      "confidence": 0.666667,
+      "lift": 2.0,
+      "support_count": 2
+    },
+    {
+      "antecedent": [
+        "Buku_DB"
+      ],
+      "consequent": [
+        "Buku_SQL",
+        "SI"
+      ],
+      "support": 0.333333,
+      "confidence": 0.666667,
+      "lift": 2.0,
+      "support_count": 2
+    },
+    {
+      "antecedent": [
+        "Buku_AI_Dasar"
+      ],
+      "consequent": [
+        "TI"
+      ],
+      "support": 0.666667,
+      "confidence": 1.0,
+      "lift": 1.5,
+      "support_count": 4
+    },
+    {
+      "antecedent": [
+        "TI"
+      ],
+      "consequent": [
+        "Buku_AI_Dasar"
+      ],
+      "support": 0.666667,
+      "confidence": 1.0,
+      "lift": 1.5,
+      "support_count": 4
+    },
+    {
+      "antecedent": [
+        "Buku_Python"
+      ],
+      "consequent": [
+        "Buku_AI_Dasar"
+      ],
+      "support": 0.333333,
+      "confidence": 1.0,
+      "lift": 1.5,
+      "support_count": 2
+    },
+    {
+      "antecedent": [
+        "Buku_Python"
+      ],
+      "consequent": [
+        "TI"
+      ],
+      "support": 0.333333,
+      "confidence": 1.0,
+      "lift": 1.5,
+      "support_count": 2
+    },
+    {
+      "antecedent": [
+        "Buku_Python"
+      ],
+      "consequent": [
+        "Buku_AI_Dasar",
+        "TI"
+      ],
+      "support": 0.333333,
+      "confidence": 1.0,
+      "lift": 1.5,
+      "support_count": 2
+    },
+    {
+      "antecedent": [
+        "Buku_AI_Dasar",
+        "Buku_Python"
+      ],
+      "consequent": [
+        "TI"
+      ],
+      "support": 0.333333,
+      "confidence": 1.0,
+      "lift": 1.5,
+      "support_count": 2
+    },
+    {
+      "antecedent": [
+        "Buku_Python",
+        "TI"
+      ],
+      "consequent": [
+        "Buku_AI_Dasar"
+      ],
+      "support": 0.333333,
+      "confidence": 1.0,
+      "lift": 1.5,
+      "support_count": 2
+    }
+  ]
+}

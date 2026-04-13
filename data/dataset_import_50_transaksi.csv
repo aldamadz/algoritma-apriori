@@ -1,0 +1,120 @@
+transaction_id,student_number,student_name,department_code,department_name,loan_date,book_isbn,book_title,book_author,book_category
+TX000001,ST00013,Mahasiswa_013,TI,Teknik Informatika,2026-01-15,978-1004,Basis Data Dasar,D. Sari,Database
+TX000001,ST00013,Mahasiswa_013,TI,Teknik Informatika,2026-01-15,978-1010,Sistem Informasi Manajemen,J. Utami,IS
+TX000001,ST00013,Mahasiswa_013,TI,Teknik Informatika,2026-01-15,978-1003,Python untuk Data,C. Putra,Programming
+TX000002,ST00347,Mahasiswa_347,TI,Teknik Informatika,2026-01-15,978-1010,Sistem Informasi Manajemen,J. Utami,IS
+TX000003,ST00017,Mahasiswa_017,TE,Teknik Elektro,2025-01-16,978-1004,Basis Data Dasar,D. Sari,Database
+TX000004,ST00259,Mahasiswa_259,SI,Sistem Informasi,2025-11-05,978-1009,Algoritma dan Struktur Data,I. Wibowo,CS
+TX000005,ST00367,Mahasiswa_367,SI,Sistem Informasi,2025-11-29,978-1004,Basis Data Dasar,D. Sari,Database
+TX000005,ST00367,Mahasiswa_367,SI,Sistem Informasi,2025-11-29,978-1008,Pemrograman Web,H. Pratama,Web
+TX000005,ST00367,Mahasiswa_367,SI,Sistem Informasi,2025-11-29,978-1005,SQL Lanjutan,E. Nugroho,Database
+TX000005,ST00367,Mahasiswa_367,SI,Sistem Informasi,2025-11-29,978-1007,Data Mining Konsep,G. Hidayat,Data Mining
+TX000006,ST00389,Mahasiswa_389,TI,Teknik Informatika,2026-02-17,978-1007,Data Mining Konsep,G. Hidayat,Data Mining
+TX000006,ST00389,Mahasiswa_389,TI,Teknik Informatika,2026-02-17,978-1006,Statistika Terapan,F. Lestari,Math
+TX000007,ST00080,Mahasiswa_080,MI,Manajemen Informatika,2025-04-21,978-1002,Machine Learning Praktis,B. Santoso,AI
+TX000007,ST00080,Mahasiswa_080,MI,Manajemen Informatika,2025-04-21,978-1010,Sistem Informasi Manajemen,J. Utami,IS
+TX000007,ST00080,Mahasiswa_080,MI,Manajemen Informatika,2025-04-21,978-1007,Data Mining Konsep,G. Hidayat,Data Mining
+TX000008,ST00184,Mahasiswa_184,TI,Teknik Informatika,2026-03-10,978-1010,Sistem Informasi Manajemen,J. Utami,IS
+TX000008,ST00184,Mahasiswa_184,TI,Teknik Informatika,2026-03-10,978-1005,SQL Lanjutan,E. Nugroho,Database
+TX000008,ST00184,Mahasiswa_184,TI,Teknik Informatika,2026-03-10,978-1001,AI Dasar,A. Wijaya,AI
+TX000009,ST00275,Mahasiswa_275,TE,Teknik Elektro,2025-03-05,978-1002,Machine Learning Praktis,B. Santoso,AI
+TX000009,ST00275,Mahasiswa_275,TE,Teknik Elektro,2025-03-05,978-1009,Algoritma dan Struktur Data,I. Wibowo,CS
+TX000009,ST00275,Mahasiswa_275,TE,Teknik Elektro,2025-03-05,978-1005,SQL Lanjutan,E. Nugroho,Database
+TX000009,ST00275,Mahasiswa_275,TE,Teknik Elektro,2025-03-05,978-1007,Data Mining Konsep,G. Hidayat,Data Mining
+TX000010,ST00296,Mahasiswa_296,MI,Manajemen Informatika,2025-04-09,978-1001,AI Dasar,A. Wijaya,AI
+TX000011,ST00396,Mahasiswa_396,SI,Sistem Informasi,2025-05-29,978-1004,Basis Data Dasar,D. Sari,Database
+TX000012,ST00195,Mahasiswa_195,TI,Teknik Informatika,2025-05-23,978-1006,Statistika Terapan,F. Lestari,Math
+TX000012,ST00195,Mahasiswa_195,TI,Teknik Informatika,2025-05-23,978-1003,Python untuk Data,C. Putra,Programming
+TX000012,ST00195,Mahasiswa_195,TI,Teknik Informatika,2025-05-23,978-1010,Sistem Informasi Manajemen,J. Utami,IS
+TX000012,ST00195,Mahasiswa_195,TI,Teknik Informatika,2025-05-23,978-1009,Algoritma dan Struktur Data,I. Wibowo,CS
+TX000013,ST00344,Mahasiswa_344,SI,Sistem Informasi,2025-05-17,978-1010,Sistem Informasi Manajemen,J. Utami,IS
+TX000014,ST00274,Mahasiswa_274,SI,Sistem Informasi,2026-01-09,978-1003,Python untuk Data,C. Putra,Programming
+TX000014,ST00274,Mahasiswa_274,SI,Sistem Informasi,2026-01-09,978-1008,Pemrograman Web,H. Pratama,Web
+TX000015,ST00139,Mahasiswa_139,TE,Teknik Elektro,2025-11-24,978-1006,Statistika Terapan,F. Lestari,Math
+TX000015,ST00139,Mahasiswa_139,TE,Teknik Elektro,2025-11-24,978-1001,AI Dasar,A. Wijaya,AI
+TX000016,ST00421,Mahasiswa_421,SI,Sistem Informasi,2025-01-17,978-1007,Data Mining Konsep,G. Hidayat,Data Mining
+TX000016,ST00421,Mahasiswa_421,SI,Sistem Informasi,2025-01-17,978-1005,SQL Lanjutan,E. Nugroho,Database
+TX000016,ST00421,Mahasiswa_421,SI,Sistem Informasi,2025-01-17,978-1002,Machine Learning Praktis,B. Santoso,AI
+TX000017,ST00291,Mahasiswa_291,SI,Sistem Informasi,2026-03-25,978-1004,Basis Data Dasar,D. Sari,Database
+TX000017,ST00291,Mahasiswa_291,SI,Sistem Informasi,2026-03-25,978-1008,Pemrograman Web,H. Pratama,Web
+TX000017,ST00291,Mahasiswa_291,SI,Sistem Informasi,2026-03-25,978-1007,Data Mining Konsep,G. Hidayat,Data Mining
+TX000018,ST00074,Mahasiswa_074,TE,Teknik Elektro,2025-05-16,978-1004,Basis Data Dasar,D. Sari,Database
+TX000018,ST00074,Mahasiswa_074,TE,Teknik Elektro,2025-05-16,978-1009,Algoritma dan Struktur Data,I. Wibowo,CS
+TX000019,ST00383,Mahasiswa_383,MI,Manajemen Informatika,2025-10-27,978-1010,Sistem Informasi Manajemen,J. Utami,IS
+TX000019,ST00383,Mahasiswa_383,MI,Manajemen Informatika,2025-10-27,978-1007,Data Mining Konsep,G. Hidayat,Data Mining
+TX000019,ST00383,Mahasiswa_383,MI,Manajemen Informatika,2025-10-27,978-1006,Statistika Terapan,F. Lestari,Math
+TX000019,ST00383,Mahasiswa_383,MI,Manajemen Informatika,2025-10-27,978-1002,Machine Learning Praktis,B. Santoso,AI
+TX000020,ST00261,Mahasiswa_261,SI,Sistem Informasi,2025-09-10,978-1001,AI Dasar,A. Wijaya,AI
+TX000021,ST00079,Mahasiswa_079,TI,Teknik Informatika,2025-11-18,978-1007,Data Mining Konsep,G. Hidayat,Data Mining
+TX000021,ST00079,Mahasiswa_079,TI,Teknik Informatika,2025-11-18,978-1002,Machine Learning Praktis,B. Santoso,AI
+TX000022,ST00196,Mahasiswa_196,TE,Teknik Elektro,2025-11-02,978-1009,Algoritma dan Struktur Data,I. Wibowo,CS
+TX000022,ST00196,Mahasiswa_196,TE,Teknik Elektro,2025-11-02,978-1005,SQL Lanjutan,E. Nugroho,Database
+TX000022,ST00196,Mahasiswa_196,TE,Teknik Elektro,2025-11-02,978-1001,AI Dasar,A. Wijaya,AI
+TX000022,ST00196,Mahasiswa_196,TE,Teknik Elektro,2025-11-02,978-1006,Statistika Terapan,F. Lestari,Math
+TX000023,ST00350,Mahasiswa_350,TI,Teknik Informatika,2025-10-02,978-1006,Statistika Terapan,F. Lestari,Math
+TX000023,ST00350,Mahasiswa_350,TI,Teknik Informatika,2025-10-02,978-1002,Machine Learning Praktis,B. Santoso,AI
+TX000023,ST00350,Mahasiswa_350,TI,Teknik Informatika,2025-10-02,978-1005,SQL Lanjutan,E. Nugroho,Database
+TX000024,ST00081,Mahasiswa_081,TE,Teknik Elektro,2025-08-21,978-1005,SQL Lanjutan,E. Nugroho,Database
+TX000025,ST00260,Mahasiswa_260,SI,Sistem Informasi,2025-02-24,978-1009,Algoritma dan Struktur Data,I. Wibowo,CS
+TX000025,ST00260,Mahasiswa_260,SI,Sistem Informasi,2025-02-24,978-1004,Basis Data Dasar,D. Sari,Database
+TX000025,ST00260,Mahasiswa_260,SI,Sistem Informasi,2025-02-24,978-1003,Python untuk Data,C. Putra,Programming
+TX000026,ST00391,Mahasiswa_391,MI,Manajemen Informatika,2025-03-24,978-1010,Sistem Informasi Manajemen,J. Utami,IS
+TX000027,ST00251,Mahasiswa_251,MI,Manajemen Informatika,2025-01-10,978-1006,Statistika Terapan,F. Lestari,Math
+TX000028,ST00123,Mahasiswa_123,MI,Manajemen Informatika,2025-01-30,978-1010,Sistem Informasi Manajemen,J. Utami,IS
+TX000028,ST00123,Mahasiswa_123,MI,Manajemen Informatika,2025-01-30,978-1002,Machine Learning Praktis,B. Santoso,AI
+TX000029,ST00375,Mahasiswa_375,TI,Teknik Informatika,2025-09-06,978-1009,Algoritma dan Struktur Data,I. Wibowo,CS
+TX000030,ST00066,Mahasiswa_066,SI,Sistem Informasi,2025-12-04,978-1009,Algoritma dan Struktur Data,I. Wibowo,CS
+TX000030,ST00066,Mahasiswa_066,SI,Sistem Informasi,2025-12-04,978-1003,Python untuk Data,C. Putra,Programming
+TX000030,ST00066,Mahasiswa_066,SI,Sistem Informasi,2025-12-04,978-1005,SQL Lanjutan,E. Nugroho,Database
+TX000030,ST00066,Mahasiswa_066,SI,Sistem Informasi,2025-12-04,978-1008,Pemrograman Web,H. Pratama,Web
+TX000031,ST00109,Mahasiswa_109,TE,Teknik Elektro,2025-10-04,978-1005,SQL Lanjutan,E. Nugroho,Database
+TX000031,ST00109,Mahasiswa_109,TE,Teknik Elektro,2025-10-04,978-1007,Data Mining Konsep,G. Hidayat,Data Mining
+TX000032,ST00225,Mahasiswa_225,MI,Manajemen Informatika,2025-09-22,978-1002,Machine Learning Praktis,B. Santoso,AI
+TX000032,ST00225,Mahasiswa_225,MI,Manajemen Informatika,2025-09-22,978-1004,Basis Data Dasar,D. Sari,Database
+TX000032,ST00225,Mahasiswa_225,MI,Manajemen Informatika,2025-09-22,978-1009,Algoritma dan Struktur Data,I. Wibowo,CS
+TX000032,ST00225,Mahasiswa_225,MI,Manajemen Informatika,2025-09-22,978-1001,AI Dasar,A. Wijaya,AI
+TX000033,ST00011,Mahasiswa_011,MI,Manajemen Informatika,2025-10-29,978-1010,Sistem Informasi Manajemen,J. Utami,IS
+TX000033,ST00011,Mahasiswa_011,MI,Manajemen Informatika,2025-10-29,978-1004,Basis Data Dasar,D. Sari,Database
+TX000034,ST00037,Mahasiswa_037,TI,Teknik Informatika,2025-12-29,978-1004,Basis Data Dasar,D. Sari,Database
+TX000035,ST00017,Mahasiswa_017,TI,Teknik Informatika,2026-03-17,978-1002,Machine Learning Praktis,B. Santoso,AI
+TX000035,ST00017,Mahasiswa_017,TI,Teknik Informatika,2026-03-17,978-1009,Algoritma dan Struktur Data,I. Wibowo,CS
+TX000035,ST00017,Mahasiswa_017,TI,Teknik Informatika,2026-03-17,978-1004,Basis Data Dasar,D. Sari,Database
+TX000036,ST00343,Mahasiswa_343,MI,Manajemen Informatika,2025-09-06,978-1009,Algoritma dan Struktur Data,I. Wibowo,CS
+TX000036,ST00343,Mahasiswa_343,MI,Manajemen Informatika,2025-09-06,978-1003,Python untuk Data,C. Putra,Programming
+TX000037,ST00125,Mahasiswa_125,TE,Teknik Elektro,2026-02-06,978-1007,Data Mining Konsep,G. Hidayat,Data Mining
+TX000037,ST00125,Mahasiswa_125,TE,Teknik Elektro,2026-02-06,978-1004,Basis Data Dasar,D. Sari,Database
+TX000037,ST00125,Mahasiswa_125,TE,Teknik Elektro,2026-02-06,978-1002,Machine Learning Praktis,B. Santoso,AI
+TX000037,ST00125,Mahasiswa_125,TE,Teknik Elektro,2026-02-06,978-1001,AI Dasar,A. Wijaya,AI
+TX000038,ST00182,Mahasiswa_182,TE,Teknik Elektro,2025-08-05,978-1008,Pemrograman Web,H. Pratama,Web
+TX000038,ST00182,Mahasiswa_182,TE,Teknik Elektro,2025-08-05,978-1001,AI Dasar,A. Wijaya,AI
+TX000038,ST00182,Mahasiswa_182,TE,Teknik Elektro,2025-08-05,978-1002,Machine Learning Praktis,B. Santoso,AI
+TX000038,ST00182,Mahasiswa_182,TE,Teknik Elektro,2025-08-05,978-1009,Algoritma dan Struktur Data,I. Wibowo,CS
+TX000039,ST00373,Mahasiswa_373,TE,Teknik Elektro,2025-06-23,978-1004,Basis Data Dasar,D. Sari,Database
+TX000040,ST00098,Mahasiswa_098,SI,Sistem Informasi,2025-10-02,978-1003,Python untuk Data,C. Putra,Programming
+TX000040,ST00098,Mahasiswa_098,SI,Sistem Informasi,2025-10-02,978-1007,Data Mining Konsep,G. Hidayat,Data Mining
+TX000040,ST00098,Mahasiswa_098,SI,Sistem Informasi,2025-10-02,978-1010,Sistem Informasi Manajemen,J. Utami,IS
+TX000040,ST00098,Mahasiswa_098,SI,Sistem Informasi,2025-10-02,978-1008,Pemrograman Web,H. Pratama,Web
+TX000041,ST00128,Mahasiswa_128,TE,Teknik Elektro,2026-03-24,978-1008,Pemrograman Web,H. Pratama,Web
+TX000042,ST00026,Mahasiswa_026,TI,Teknik Informatika,2025-11-30,978-1002,Machine Learning Praktis,B. Santoso,AI
+TX000043,ST00086,Mahasiswa_086,SI,Sistem Informasi,2025-07-28,978-1008,Pemrograman Web,H. Pratama,Web
+TX000043,ST00086,Mahasiswa_086,SI,Sistem Informasi,2025-07-28,978-1004,Basis Data Dasar,D. Sari,Database
+TX000043,ST00086,Mahasiswa_086,SI,Sistem Informasi,2025-07-28,978-1007,Data Mining Konsep,G. Hidayat,Data Mining
+TX000043,ST00086,Mahasiswa_086,SI,Sistem Informasi,2025-07-28,978-1001,AI Dasar,A. Wijaya,AI
+TX000044,ST00195,Mahasiswa_195,SI,Sistem Informasi,2025-01-02,978-1005,SQL Lanjutan,E. Nugroho,Database
+TX000044,ST00195,Mahasiswa_195,SI,Sistem Informasi,2025-01-02,978-1008,Pemrograman Web,H. Pratama,Web
+TX000044,ST00195,Mahasiswa_195,SI,Sistem Informasi,2025-01-02,978-1010,Sistem Informasi Manajemen,J. Utami,IS
+TX000044,ST00195,Mahasiswa_195,SI,Sistem Informasi,2025-01-02,978-1004,Basis Data Dasar,D. Sari,Database
+TX000045,ST00080,Mahasiswa_080,TE,Teknik Elektro,2025-04-08,978-1004,Basis Data Dasar,D. Sari,Database
+TX000045,ST00080,Mahasiswa_080,TE,Teknik Elektro,2025-04-08,978-1001,AI Dasar,A. Wijaya,AI
+TX000045,ST00080,Mahasiswa_080,TE,Teknik Elektro,2025-04-08,978-1009,Algoritma dan Struktur Data,I. Wibowo,CS
+TX000046,ST00030,Mahasiswa_030,MI,Manajemen Informatika,2025-01-26,978-1009,Algoritma dan Struktur Data,I. Wibowo,CS
+TX000046,ST00030,Mahasiswa_030,MI,Manajemen Informatika,2025-01-26,978-1010,Sistem Informasi Manajemen,J. Utami,IS
+TX000046,ST00030,Mahasiswa_030,MI,Manajemen Informatika,2025-01-26,978-1003,Python untuk Data,C. Putra,Programming
+TX000046,ST00030,Mahasiswa_030,MI,Manajemen Informatika,2025-01-26,978-1001,AI Dasar,A. Wijaya,AI
+TX000047,ST00436,Mahasiswa_436,TI,Teknik Informatika,2025-04-06,978-1010,Sistem Informasi Manajemen,J. Utami,IS
+TX000048,ST00346,Mahasiswa_346,TI,Teknik Informatika,2026-03-18,978-1007,Data Mining Konsep,G. Hidayat,Data Mining
+TX000048,ST00346,Mahasiswa_346,TI,Teknik Informatika,2026-03-18,978-1002,Machine Learning Praktis,B. Santoso,AI
+TX000049,ST00297,Mahasiswa_297,SI,Sistem Informasi,2025-11-01,978-1010,Sistem Informasi Manajemen,J. Utami,IS
+TX000050,ST00215,Mahasiswa_215,TI,Teknik Informatika,2025-12-03,978-1005,SQL Lanjutan,E. Nugroho,Database
+TX000050,ST00215,Mahasiswa_215,TI,Teknik Informatika,2025-12-03,978-1004,Basis Data Dasar,D. Sari,Database
+TX000050,ST00215,Mahasiswa_215,TI,Teknik Informatika,2025-12-03,978-1006,Statistika Terapan,F. Lestari,Math
