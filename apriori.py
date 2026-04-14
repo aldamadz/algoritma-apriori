@@ -12,6 +12,7 @@ from typing import Dict, FrozenSet, Iterable, List, Sequence, Set, Tuple
 
 
 Itemset = FrozenSet[str]
+ItemColumnSpec = Tuple[str, str]
 
 
 @dataclass(frozen=True)
@@ -198,18 +199,72 @@ def load_transactions_from_csv(
     transaction_id_col: str = "transaction_id",
     item_col: str = "item",
 ) -> List[List[str]]:
+    return load_transactions_from_csv_multi(
+        file_path=file_path,
+        transaction_id_col=transaction_id_col,
+        item_specs=[(item_col, "")],
+    )
+
+
+def parse_item_specs(value: str) -> List[ItemColumnSpec]:
+    specs: List[ItemColumnSpec] = []
+    for raw_spec in value.split(","):
+        spec = raw_spec.strip()
+        if not spec:
+            continue
+        if "=" in spec:
+            column, prefix = spec.split("=", 1)
+        else:
+            column, prefix = spec, ""
+        column = column.strip()
+        prefix = prefix.strip()
+        if not column:
+            raise ValueError(f"Invalid item spec '{raw_spec}'. Expected 'column' or 'column=Prefix'.")
+        specs.append((column, prefix))
+    if not specs:
+        raise ValueError("Item specs cannot be empty.")
+    return specs
+
+
+def load_transactions_from_csv_multi(
+    file_path: str | Path,
+    transaction_id_col: str = "transaction_id",
+    item_specs: Sequence[ItemColumnSpec] = (("item", ""),),
+) -> List[List[str]]:
+    if not item_specs:
+        raise ValueError("At least one item column must be provided.")
+
     grouped: Dict[str, List[str]] = defaultdict(list)
+    seen_by_txn: Dict[str, Set[str]] = defaultdict(set)
     with open(file_path, "r", encoding="utf-8-sig", newline="") as f:
         reader = csv.DictReader(f)
-        if transaction_id_col not in (reader.fieldnames or []):
-            raise ValueError(f"Column '{transaction_id_col}' not found in CSV.")
-        if item_col not in (reader.fieldnames or []):
-            raise ValueError(f"Column '{item_col}' not found in CSV.")
+        fieldnames = reader.fieldnames or []
+        available_cols = ", ".join(fieldnames) if fieldnames else "<none>"
+        if transaction_id_col not in fieldnames:
+            raise ValueError(
+                f"Column '{transaction_id_col}' not found in CSV. Available columns: {available_cols}"
+            )
+
+        missing_item_cols = [column for column, _ in item_specs if column not in fieldnames]
+        if missing_item_cols:
+            missing_cols = ", ".join(sorted(set(missing_item_cols)))
+            raise ValueError(
+                f"Item columns not found in CSV: {missing_cols}. Available columns: {available_cols}"
+            )
+
         for row in reader:
             txn_id = (row.get(transaction_id_col) or "").strip()
-            item = (row.get(item_col) or "").strip()
-            if txn_id and item:
-                grouped[txn_id].append(item)
+            if not txn_id:
+                continue
+
+            for column, prefix in item_specs:
+                value = (row.get(column) or "").strip()
+                if not value:
+                    continue
+                item = f"{prefix}:{value}" if prefix else value
+                if item not in seen_by_txn[txn_id]:
+                    grouped[txn_id].append(item)
+                    seen_by_txn[txn_id].add(item)
 
     return [items for _, items in sorted(grouped.items(), key=lambda x: x[0])]
 
