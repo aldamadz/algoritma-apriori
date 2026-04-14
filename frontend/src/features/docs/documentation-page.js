@@ -6,6 +6,7 @@ const DOCS = [
     { slug: "kebutuhan_sistem", title: "Kebutuhan Sistem Apriori Engine", file: "kebutuhan_sistem.md" },
     { slug: "panduan_client_sidang", title: "Panduan Client dan Sidang", file: "panduan_client_sidang.md" },
     { slug: "spesifikasi_ui_rules", title: "Spesifikasi UI Rules", file: "spesifikasi_ui_rules.md" },
+    { slug: "diagram_skripsi", title: "Diagram Skripsi", file: "diagram_skripsi.md" },
 ];
 const getSlugFromPath = (pathname) => {
     const chunks = pathname.split("/").filter(Boolean);
@@ -24,6 +25,8 @@ export function DocumentationPage() {
     const [error, setError] = useState("");
     useEffect(() => {
         if (!selected)
+            return;
+        if (selected.slug === "diagram_skripsi")
             return;
         let cancelled = false;
         const load = async () => {
@@ -52,5 +55,18 @@ export function DocumentationPage() {
             cancelled = true;
         };
     }, [selected]);
-    return (_jsxs("div", { className: "mx-auto max-w-6xl space-y-4 p-6", children: [_jsxs(Card, { children: [_jsx(CardHeader, { children: _jsx(CardTitle, { children: "Dokumentasi Sistem" }) }), _jsxs(CardContent, { className: "space-y-2 text-sm", children: [_jsx("div", { children: "Daftar dokumen:" }), _jsx("ul", { className: "list-disc space-y-1 pl-5", children: DOCS.map((doc) => (_jsx("li", { children: _jsx("a", { className: "text-blue-700 underline", href: `/dokumentasi/${doc.slug}`, children: doc.title }) }, doc.slug))) }), _jsxs("div", { className: "pt-1 text-slate-600", children: ["Akses juga via path alternatif: ", _jsx("code", { children: "/docs/{slug}" })] }), _jsx("div", { children: _jsx("a", { className: "text-blue-700 underline", href: "/", children: "Kembali ke aplikasi" }) })] })] }), slug ? (_jsxs(Card, { children: [_jsx(CardHeader, { children: _jsx(CardTitle, { children: selected?.title ?? "Dokumen tidak ditemukan" }) }), _jsxs(CardContent, { children: [loading ? _jsx("div", { className: "text-sm", children: "Memuat dokumen..." }) : null, error ? _jsx("div", { className: "text-sm text-red-600", children: error }) : null, !loading && !error && selected ? (_jsx("pre", { className: "whitespace-pre-wrap rounded-md bg-slate-50 p-4 text-sm", children: content })) : null, !loading && !error && !selected ? (_jsx("div", { className: "text-sm text-amber-700", children: "Slug dokumen tidak dikenali." })) : null] })] })) : null] }));
+    return (_jsxs("div", { className: "mx-auto max-w-6xl space-y-4 p-6", children: [_jsxs(Card, { children: [_jsx(CardHeader, { children: _jsx(CardTitle, { children: "Dokumentasi Sistem" }) }), _jsxs(CardContent, { className: "space-y-2 text-sm", children: [_jsx("div", { children: "Daftar dokumen:" }), _jsx("ul", { className: "list-disc space-y-1 pl-5", children: DOCS.map((doc) => (_jsx("li", { children: _jsx("a", { className: "text-blue-700 underline", href: `/dokumentasi/${doc.slug}`, children: doc.title }) }, doc.slug))) }), _jsxs("div", { className: "pt-1 text-slate-600", children: ["Akses juga via path alternatif: ", _jsx("code", { children: "/docs/{slug}" })] }), _jsx("div", { children: _jsx("a", { className: "text-blue-700 underline", href: "/", children: "Kembali ke aplikasi" }) })] })] }), slug ? (_jsxs(Card, { children: [_jsx(CardHeader, { children: _jsx(CardTitle, { children: selected?.title ?? "Dokumen tidak ditemukan" }) }), _jsxs(CardContent, { children: [selected?.slug === "diagram_skripsi" ? (_jsx("div", { className: "space-y-4", children: [
+                                    "Entity Diagram",
+                                    "ERD",
+                                    "Use Case",
+                                    "Flowchart End-to-End",
+                                    "Activity Diagram",
+                                    "Sequence Import CSV",
+                                    "Sequence Run Apriori",
+                                    "Deployment Diagram",
+                                    "Arsitektur Komponen",
+                                ].map((title, idx) => {
+                                    const n = String(idx + 1).padStart(2, "0");
+                                    return (_jsxs("div", { className: "space-y-2", children: [_jsxs("div", { className: "text-sm font-semibold", children: [idx + 1, ". ", title] }), _jsx("img", { src: `/docs/diagrams/diagram_${n}.png`, alt: title, className: "w-full rounded-md border bg-white", loading: "lazy" })] }, n));
+                                }) })) : null, loading ? _jsx("div", { className: "text-sm", children: "Memuat dokumen..." }) : null, error ? _jsx("div", { className: "text-sm text-red-600", children: error }) : null, !loading && !error && selected && selected.slug !== "diagram_skripsi" ? (_jsx("pre", { className: "whitespace-pre-wrap rounded-md bg-slate-50 p-4 text-sm", children: content })) : null, !loading && !error && !selected ? (_jsx("div", { className: "text-sm text-amber-700", children: "Slug dokumen tidak dikenali." })) : null] })] })) : null] }));
 }
