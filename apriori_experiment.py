@@ -7,7 +7,13 @@ from pathlib import Path
 from time import perf_counter
 from typing import List
 
-from apriori import apriori, load_transactions_from_csv
+from apriori import (
+    ItemColumnSpec,
+    apriori,
+    load_transactions_from_csv,
+    load_transactions_from_csv_multi,
+    parse_item_specs,
+)
 
 
 def _parse_float_list(value: str) -> List[float]:
@@ -24,12 +30,27 @@ def run_experiment(
     min_lift: float,
     transaction_id_col: str,
     item_col: str,
+    item_specs: List[ItemColumnSpec] | None = None,
 ) -> List[dict]:
-    transactions = load_transactions_from_csv(
-        file_path=csv_path,
-        transaction_id_col=transaction_id_col,
-        item_col=item_col,
-    )
+    if item_specs:
+        transactions = load_transactions_from_csv_multi(
+            file_path=csv_path,
+            transaction_id_col=transaction_id_col,
+            item_specs=item_specs,
+        )
+        item_mode = "multi"
+        item_source = ",".join(
+            f"{column}={prefix}" if prefix else column for column, prefix in item_specs
+        )
+    else:
+        transactions = load_transactions_from_csv(
+            file_path=csv_path,
+            transaction_id_col=transaction_id_col,
+            item_col=item_col,
+        )
+        item_mode = "single"
+        item_source = item_col
+
     rows: List[dict] = []
     for s in supports:
         for c in confidences:
@@ -43,6 +64,8 @@ def run_experiment(
             duration_ms = (perf_counter() - t0) * 1000
             rows.append(
                 {
+                    "item_mode": item_mode,
+                    "item_source": item_source,
                     "min_support": s,
                     "min_confidence": c,
                     "min_lift": min_lift,
@@ -113,11 +136,18 @@ def main() -> None:
     parser.add_argument("--min-lift", type=float, default=0.0, help="Nilai minimum lift.")
     parser.add_argument("--transaction-id-col", default="transaction_id", help="Nama kolom transaction id.")
     parser.add_argument("--item-col", default="item", help="Nama kolom item.")
+    parser.add_argument(
+        "--item-specs",
+        default="",
+        help="Daftar item gabungan. Format: col atau col=Prefix, dipisah koma. "
+        "Contoh: department_code=Jurusan,book_title=Buku",
+    )
     parser.add_argument("--out-dir", default="experiment_output", help="Folder output eksperimen.")
     args = parser.parse_args()
 
     supports = _parse_float_list(args.supports)
     confidences = _parse_float_list(args.confidences)
+    item_specs = parse_item_specs(args.item_specs) if args.item_specs.strip() else None
 
     rows = run_experiment(
         csv_path=args.csv,
@@ -126,6 +156,7 @@ def main() -> None:
         min_lift=args.min_lift,
         transaction_id_col=args.transaction_id_col,
         item_col=args.item_col,
+        item_specs=item_specs,
     )
 
     out_dir = Path(args.out_dir)
