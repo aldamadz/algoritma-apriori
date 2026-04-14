@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Helmet } from "react-helmet-async";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -58,6 +59,15 @@ export function DocumentationPage() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-4 p-6">
+      <Helmet>
+        <title>
+          {selected ? `Apriori Docs | ${selected.title}` : "Apriori Docs | Dokumentasi Sistem"}
+        </title>
+        <meta
+          name="description"
+          content="Dokumentasi sistem Apriori Engine: penggunaan, kebutuhan, panduan, spesifikasi, dan diagram skripsi."
+        />
+      </Helmet>
       <Card>
         <CardHeader>
           <CardTitle>Dokumentasi Sistem</CardTitle>

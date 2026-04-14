@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 
 import { Button } from "@/components/ui/button";
 import { DocumentationPage } from "@/features/docs/documentation-page";
@@ -58,45 +59,65 @@ export function App() {
   };
 
   if (loading) {
-    return <div className="p-6 text-sm">Memuat data analisis...</div>;
+    return (
+      <>
+        <Helmet>
+          <title>Apriori Engine | Memuat</title>
+          <meta name="description" content="Sistem analisis pola peminjaman perpustakaan berbasis Apriori." />
+        </Helmet>
+        <div className="p-6 text-sm">Memuat data analisis...</div>
+      </>
+    );
   }
 
   if (!runId) {
     return (
-      <div className="mx-auto max-w-7xl space-y-4 p-3 sm:p-4 md:p-6">
-        <CsvImportPanel onImported={() => void reloadData()} />
-        <RunAnalysisPanel onRan={() => void reloadData()} />
-        <div className="rounded-md border bg-white p-4 text-sm">
-          Belum ada analysis run. Import data lalu klik panel "Jalankan Analisis".
-          <Button className="mt-3" variant="outline" onClick={() => void reloadData()}>
-            Refresh
-          </Button>
+      <>
+        <Helmet>
+          <title>Apriori Engine | Setup Run</title>
+          <meta name="description" content="Import data transaksi dan jalankan analisis Apriori pertama." />
+        </Helmet>
+        <div className="mx-auto max-w-7xl space-y-4 p-3 sm:p-4 md:p-6">
+          <CsvImportPanel onImported={() => void reloadData()} />
+          <RunAnalysisPanel onRan={() => void reloadData()} />
+          <div className="rounded-md border bg-white p-4 text-sm">
+            Belum ada analysis run. Import data lalu klik panel "Jalankan Analisis".
+            <Button className="mt-3" variant="outline" onClick={() => void reloadData()}>
+              Refresh
+            </Button>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-4 p-3 sm:p-4">
-      <div>
-        <CsvImportPanel onImported={() => void reloadData()} />
-        <div className="mt-4">
-          <RunAnalysisPanel onRan={() => void reloadData()} />
+    <>
+      <Helmet>
+        <title>Apriori Engine | Run {runId}</title>
+        <meta name="description" content="Dashboard analisis Apriori: import data, riwayat run, compare run, dan rules." />
+      </Helmet>
+      <div className="mx-auto max-w-7xl space-y-4 p-3 sm:p-4">
+        <div>
+          <CsvImportPanel onImported={() => void reloadData()} />
+          <div className="mt-4">
+            <RunAnalysisPanel onRan={() => void reloadData()} />
+          </div>
+          <div className="mt-4">
+            <RunsHistoryPanel
+              runs={runs}
+              selectedRunId={runId}
+              onSelect={setRunId}
+              onRefresh={() => void reloadData()}
+              onDelete={(id) => void deleteRun(id)}
+            />
+          </div>
+          <div className="mt-4">
+            <CompareRunsPanel runs={runs} />
+          </div>
         </div>
-        <div className="mt-4">
-          <RunsHistoryPanel
-            runs={runs}
-            selectedRunId={runId}
-            onSelect={setRunId}
-            onRefresh={() => void reloadData()}
-            onDelete={(id) => void deleteRun(id)}
-          />
-        </div>
-        <div className="mt-4">
-          <CompareRunsPanel runs={runs} />
-        </div>
+        <RulesPage analysisRunId={runId} departments={departments} />
       </div>
-      <RulesPage analysisRunId={runId} departments={departments} />
-    </div>
+    </>
   );
 }
