@@ -93,23 +93,53 @@ export function DocumentationPage() {
             {selected?.slug === "diagram_skripsi" ? (
               <div className="space-y-4">
                 {[
-                  "Entity Diagram",
-                  "ERD",
-                  "Use Case",
-                  "Flowchart End-to-End",
-                  "Activity Diagram",
-                  "Sequence Import CSV",
-                  "Sequence Run Apriori",
-                  "Deployment Diagram",
-                  "Arsitektur Komponen",
-                ].map((title, idx) => {
+                  {
+                    title: "Entity Diagram",
+                    desc: "Relasi konseptual antar entitas utama sistem.",
+                  },
+                  {
+                    title: "ERD",
+                    desc: "Struktur tabel, atribut, PK/FK, dan kardinalitas basis data.",
+                  },
+                  {
+                    title: "Use Case",
+                    desc: "Interaksi aktor (admin/operator) terhadap fungsi sistem.",
+                  },
+                  {
+                    title: "Flowchart End-to-End",
+                    desc: "Alur proses dari import data hingga rules ditampilkan.",
+                  },
+                  {
+                    title: "Activity Diagram",
+                    desc: "Rangkaian aktivitas saat menjalankan analisis Apriori.",
+                  },
+                  {
+                    title: "Sequence Import CSV",
+                    desc: "Urutan komunikasi frontend, backend, dan database saat import.",
+                  },
+                  {
+                    title: "Sequence Run Apriori",
+                    desc: "Urutan proses saat eksekusi run analisis hingga simpan rules.",
+                  },
+                  {
+                    title: "Deployment Diagram",
+                    desc: "Topologi deployment (Cloudflare Tunnel, frontend, backend, database).",
+                  },
+                  {
+                    title: "Arsitektur Komponen",
+                    desc: "Hubungan antar modul UI, API route, engine, dan tabel data.",
+                  },
+                ].map((item, idx) => {
                   const n = String(idx + 1).padStart(2, "0");
                   return (
                     <div key={n} className="space-y-2">
-                      <div className="text-sm font-semibold">{idx + 1}. {title}</div>
+                      <div className="text-sm font-semibold">
+                        {idx + 1}. {item.title}
+                      </div>
+                      <div className="text-xs text-slate-600">{item.desc}</div>
                       <img
                         src={`/docs/diagrams/diagram_${n}.png`}
-                        alt={title}
+                        alt={item.title}
                         className="w-full rounded-md border bg-white"
                         loading="lazy"
                       />
