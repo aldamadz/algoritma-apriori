@@ -1,0 +1,15 @@
+flowchart TD
+  S([Start]) --> U[Upload CSV]
+  U --> V{Validasi format & kolom}
+  V -- Tidak valid --> E1[Catat error baris]
+  E1 --> U
+  V -- Valid --> M[Simpan master & transaksi]
+  M --> P[Input parameter min_support, min_confidence, min_lift]
+  P --> R[Run Apriori]
+  R --> G[Generate rules + hitung support/confidence/lift]
+  G --> D[Simpan ke analysis_runs & association_rules]
+  D --> T[Tampilkan rules di UI]
+  T --> C{Perlu compare run?}
+  C -- Ya --> K[Bandingkan Run A vs Run B]
+  C -- Tidak --> X([Selesai])
+  K --> X

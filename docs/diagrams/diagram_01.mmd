@@ -1,0 +1,6 @@
+erDiagram
+  DEPARTMENT ||--o{ STUDENT : memiliki
+  STUDENT ||--o{ LOAN_TRANSACTION : melakukan
+  LOAN_TRANSACTION ||--o{ LOAN_TRANSACTION_ITEM : berisi
+  BOOK ||--o{ LOAN_TRANSACTION_ITEM : dipinjam
+  ANALYSIS_RUN ||--o{ ASSOCIATION_RULE : menghasilkan

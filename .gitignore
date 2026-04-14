@@ -13,6 +13,8 @@ backend/.venv/
 # Node
 frontend/node_modules/
 frontend/dist/
+.npm-cache/
+.npm-global/
 
 # Env files
 .env
@@ -21,6 +23,9 @@ frontend/.env
 
 # Notebook
 .ipynb_checkpoints/
+.jupyter_data/
+.jupyter_runtime/
+.jupyter_config/
 
 # OS
 .DS_Store

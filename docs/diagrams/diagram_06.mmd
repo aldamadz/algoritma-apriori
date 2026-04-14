@@ -1,0 +1,14 @@
+sequenceDiagram
+  participant U as User
+  participant FE as Frontend
+  participant API as FastAPI
+  participant DB as PostgreSQL/SQLite
+
+  U->>FE: Pilih file CSV + klik Import
+  FE->>API: POST /api/transactions/import-csv (multipart)
+  API->>API: Validasi kolom + parsing row
+  API->>DB: Upsert Department/Student/Book
+  API->>DB: Insert LoanTransaction + LoanTransactionItem
+  DB-->>API: OK
+  API-->>FE: Summary import + errors
+  FE-->>U: Tampilkan hasil import

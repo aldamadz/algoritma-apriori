@@ -1,0 +1,10 @@
+flowchart TD
+  A[User pilih menu Jalankan Analisis] --> B[Isi parameter]
+  B --> C[Klik Run]
+  C --> D[Backend ambil transaksi]
+  D --> E[Bentuk basket Jurusan + Buku]
+  E --> F[Frequent Itemset Mining]
+  F --> G[Association Rule Generation]
+  G --> H[Simpan hasil run]
+  H --> I[UI reload run terbaru]
+  I --> J[Rules ditampilkan]

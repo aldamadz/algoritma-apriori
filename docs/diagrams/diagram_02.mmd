@@ -1,0 +1,71 @@
+erDiagram
+  DEPARTMENT {
+    int id PK
+    string code UK
+    string name
+    datetime created_at
+  }
+
+  STUDENT {
+    int id PK
+    string student_number UK
+    string name
+    int department_id FK
+    datetime created_at
+  }
+
+  BOOK {
+    int id PK
+    string isbn UK
+    string title
+    string author
+    string category
+    datetime created_at
+  }
+
+  LOAN_TRANSACTION {
+    int id PK
+    int student_id FK
+    date loan_date
+    date return_date
+    datetime created_at
+  }
+
+  LOAN_TRANSACTION_ITEM {
+    int id PK
+    int transaction_id FK
+    int book_id FK
+  }
+
+  ANALYSIS_RUN {
+    int id PK
+    string run_name
+    date period_start
+    date period_end
+    float min_support
+    float min_confidence
+    float min_lift
+    string status
+    datetime created_at
+    datetime finished_at
+  }
+
+  ASSOCIATION_RULE {
+    int id PK
+    int analysis_run_id FK
+    json antecedent_items
+    json consequent_items
+    text antecedent_text
+    text consequent_text
+    float support_value
+    float confidence_value
+    float lift_value
+    int support_count
+    datetime created_at
+  }
+
+  DEPARTMENT ||--o{ STUDENT : "1..n"
+  STUDENT ||--o{ LOAN_TRANSACTION : "1..n"
+  LOAN_TRANSACTION ||--o{ LOAN_TRANSACTION_ITEM : "1..n"
+  BOOK ||--o{ LOAN_TRANSACTION_ITEM : "1..n"
+  ANALYSIS_RUN ||--o{ ASSOCIATION_RULE : "1..n"

@@ -1,0 +1,6 @@
+flowchart LR
+  U[Browser User] --> CF[Cloudflare Tunnel]
+  CF --> NGINX[Nginx Frontend Container :18080]
+  NGINX --> FE[Static React App]
+  NGINX --> API[FastAPI Container :18000 via /api]
+  API --> DB[(PostgreSQL Existing Container)]

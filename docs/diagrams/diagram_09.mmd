@@ -1,0 +1,38 @@
+flowchart LR
+  subgraph Frontend
+    A1[Import CSV Panel]
+    A2[Run Analysis Panel]
+    A3[Runs History Panel]
+    A4[Compare Runs Panel]
+    A5[Rules Table + Filter + Detail]
+  end
+
+  subgraph Backend
+    B1[Transactions Route]
+    B2[Analysis Route]
+    B3[Apriori Engine Service]
+  end
+
+  subgraph Data
+    C1[(departments)]
+    C2[(students)]
+    C3[(books)]
+    C4[(loan_transactions)]
+    C5[(loan_transaction_items)]
+    C6[(analysis_runs)]
+    C7[(association_rules)]
+  end
+
+  A1 --> B1
+  A2 --> B2
+  A3 --> B2
+  A4 --> B2
+  A5 --> B2
+  B2 --> B3
+  B1 --> C1
+  B1 --> C2
+  B1 --> C3
+  B1 --> C4
+  B1 --> C5
+  B2 --> C6
+  B2 --> C7

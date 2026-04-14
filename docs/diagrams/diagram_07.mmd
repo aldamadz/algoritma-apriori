@@ -1,0 +1,16 @@
+sequenceDiagram
+  participant U as User
+  participant FE as Frontend
+  participant API as FastAPI
+  participant ENG as Apriori Engine
+  participant DB as PostgreSQL/SQLite
+
+  U->>FE: Klik Run Analysis
+  FE->>API: POST /api/analysis/run
+  API->>DB: Ambil transaksi + relasi buku/jurusan
+  API->>ENG: Kirim basket + parameter
+  ENG-->>API: Rules (support, confidence, lift)
+  API->>DB: Simpan analysis_run + association_rules
+  API-->>FE: Response status done
+  FE->>API: GET /api/analysis/runs/{id}/rules
+  API-->>FE: Data rules + summary
