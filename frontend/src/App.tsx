@@ -62,7 +62,7 @@ export function App() {
     return (
       <>
         <Helmet>
-          <title>Apriori Engine | Memuat</title>
+          <title>Apriori Engine - Analisis Peminjaman Perpustakaan</title>
           <meta name="description" content="Sistem analisis pola peminjaman perpustakaan berbasis Apriori." />
         </Helmet>
         <div className="p-6 text-sm">Memuat data analisis...</div>
@@ -74,7 +74,7 @@ export function App() {
     return (
       <>
         <Helmet>
-          <title>Apriori Engine | Setup Run</title>
+          <title>Apriori Engine - Analisis Peminjaman Perpustakaan</title>
           <meta name="description" content="Import data transaksi dan jalankan analisis Apriori pertama." />
         </Helmet>
         <div className="mx-auto max-w-7xl space-y-4 p-3 sm:p-4 md:p-6">
@@ -94,7 +94,7 @@ export function App() {
   return (
     <>
       <Helmet>
-        <title>Apriori Engine | Run {runId}</title>
+        <title>Apriori Engine - Analisis Peminjaman Perpustakaan</title>
         <meta name="description" content="Dashboard analisis Apriori: import data, riwayat run, compare run, dan rules." />
       </Helmet>
       <div className="mx-auto max-w-7xl space-y-4 p-3 sm:p-4">

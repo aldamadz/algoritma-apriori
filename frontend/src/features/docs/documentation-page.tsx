@@ -60,9 +60,7 @@ export function DocumentationPage() {
   return (
     <div className="mx-auto max-w-6xl space-y-4 p-6">
       <Helmet>
-        <title>
-          {selected ? `Apriori Docs | ${selected.title}` : "Apriori Docs | Dokumentasi Sistem"}
-        </title>
+        <title>Dokumentasi - Apriori Engine</title>
         <meta
           name="description"
           content="Dokumentasi sistem Apriori Engine: penggunaan, kebutuhan, panduan, spesifikasi, dan diagram skripsi."
