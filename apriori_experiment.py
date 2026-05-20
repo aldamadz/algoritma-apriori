@@ -23,6 +23,10 @@ def _parse_float_list(value: str) -> List[float]:
     return [float(p) for p in parts]
 
 
+def _parse_str_list(value: str) -> List[str]:
+    return [p.strip() for p in value.split(",") if p.strip()]
+
+
 def run_experiment(
     csv_path: str,
     supports: List[float],
@@ -31,11 +35,16 @@ def run_experiment(
     transaction_id_col: str,
     item_col: str,
     item_specs: List[ItemColumnSpec] | None = None,
+    transaction_key_cols: List[str] | None = None,
 ) -> List[dict]:
+    txn_mode = "composite" if transaction_key_cols else "single"
+    txn_source = ",".join(transaction_key_cols) if transaction_key_cols else transaction_id_col
+
     if item_specs:
         transactions = load_transactions_from_csv_multi(
             file_path=csv_path,
             transaction_id_col=transaction_id_col,
+            transaction_key_cols=transaction_key_cols,
             item_specs=item_specs,
         )
         item_mode = "multi"
@@ -46,6 +55,7 @@ def run_experiment(
         transactions = load_transactions_from_csv(
             file_path=csv_path,
             transaction_id_col=transaction_id_col,
+            transaction_key_cols=transaction_key_cols,
             item_col=item_col,
         )
         item_mode = "single"
@@ -64,6 +74,8 @@ def run_experiment(
             duration_ms = (perf_counter() - t0) * 1000
             rows.append(
                 {
+                    "transaction_mode": txn_mode,
+                    "transaction_source": txn_source,
                     "item_mode": item_mode,
                     "item_source": item_source,
                     "min_support": s,
@@ -135,6 +147,12 @@ def main() -> None:
     parser.add_argument("--confidences", default="0.5,0.6,0.7", help="Daftar min_confidence, dipisah koma.")
     parser.add_argument("--min-lift", type=float, default=0.0, help="Nilai minimum lift.")
     parser.add_argument("--transaction-id-col", default="transaction_id", help="Nama kolom transaction id.")
+    parser.add_argument(
+        "--transaction-key-cols",
+        default="",
+        help="Kolom gabungan untuk membentuk transaksi, dipisah koma. "
+        "Contoh: no_mhs,tgl_pinjam. Jika diisi, opsi ini menggantikan --transaction-id-col.",
+    )
     parser.add_argument("--item-col", default="item", help="Nama kolom item.")
     parser.add_argument(
         "--item-specs",
@@ -148,6 +166,9 @@ def main() -> None:
     supports = _parse_float_list(args.supports)
     confidences = _parse_float_list(args.confidences)
     item_specs = parse_item_specs(args.item_specs) if args.item_specs.strip() else None
+    transaction_key_cols = (
+        _parse_str_list(args.transaction_key_cols) if args.transaction_key_cols.strip() else None
+    )
 
     rows = run_experiment(
         csv_path=args.csv,
@@ -157,6 +178,7 @@ def main() -> None:
         transaction_id_col=args.transaction_id_col,
         item_col=args.item_col,
         item_specs=item_specs,
+        transaction_key_cols=transaction_key_cols,
     )
 
     out_dir = Path(args.out_dir)

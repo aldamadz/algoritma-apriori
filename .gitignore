@@ -30,3 +30,10 @@ frontend/.env
 # OS
 .DS_Store
 Thumbs.db
+
+# Docs
+docs/
+Naskah/
+
+# Dataset
+dataset.csv

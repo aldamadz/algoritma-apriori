@@ -198,10 +198,12 @@ def load_transactions_from_csv(
     file_path: str | Path,
     transaction_id_col: str = "transaction_id",
     item_col: str = "item",
+    transaction_key_cols: Sequence[str] | None = None,
 ) -> List[List[str]]:
     return load_transactions_from_csv_multi(
         file_path=file_path,
         transaction_id_col=transaction_id_col,
+        transaction_key_cols=transaction_key_cols,
         item_specs=[(item_col, "")],
     )
 
@@ -230,17 +232,28 @@ def load_transactions_from_csv_multi(
     file_path: str | Path,
     transaction_id_col: str = "transaction_id",
     item_specs: Sequence[ItemColumnSpec] = (("item", ""),),
+    transaction_key_cols: Sequence[str] | None = None,
 ) -> List[List[str]]:
     if not item_specs:
         raise ValueError("At least one item column must be provided.")
 
+    key_cols = [col.strip() for col in (transaction_key_cols or []) if col.strip()]
     grouped: Dict[str, List[str]] = defaultdict(list)
     seen_by_txn: Dict[str, Set[str]] = defaultdict(set)
     with open(file_path, "r", encoding="utf-8-sig", newline="") as f:
         reader = csv.DictReader(f)
         fieldnames = reader.fieldnames or []
         available_cols = ", ".join(fieldnames) if fieldnames else "<none>"
-        if transaction_id_col not in fieldnames:
+
+        if key_cols:
+            missing_key_cols = [column for column in key_cols if column not in fieldnames]
+            if missing_key_cols:
+                missing_cols = ", ".join(sorted(set(missing_key_cols)))
+                raise ValueError(
+                    f"Transaction key columns not found in CSV: {missing_cols}. "
+                    f"Available columns: {available_cols}"
+                )
+        elif transaction_id_col not in fieldnames:
             raise ValueError(
                 f"Column '{transaction_id_col}' not found in CSV. Available columns: {available_cols}"
             )
@@ -253,7 +266,13 @@ def load_transactions_from_csv_multi(
             )
 
         for row in reader:
-            txn_id = (row.get(transaction_id_col) or "").strip()
+            if key_cols:
+                key_values = [(row.get(column) or "").strip() for column in key_cols]
+                if not all(key_values):
+                    continue
+                txn_id = "|".join(key_values)
+            else:
+                txn_id = (row.get(transaction_id_col) or "").strip()
             if not txn_id:
                 continue
 
