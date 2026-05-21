@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,14 +8,37 @@ type Props = {
   onRan?: () => void;
 };
 
+const toDdmmyyyy = (value: string): string => {
+  const [year, month, day] = value.split("-");
+  if (!year || !month || !day) return value;
+  return `${day}${month}${year}`;
+};
+
+const buildRunName = (periodStart: string, periodEnd: string): string => {
+  if (!periodStart && !periodEnd) return "analisis-semua-data";
+  if (periodStart && periodEnd && periodStart === periodEnd) return `analisis-${toDdmmyyyy(periodStart)}`;
+  if (periodStart && periodEnd) return `analisis-${toDdmmyyyy(periodStart)}-sd-${toDdmmyyyy(periodEnd)}`;
+  if (periodStart) return `analisis-mulai-${toDdmmyyyy(periodStart)}`;
+  return `analisis-sampai-${toDdmmyyyy(periodEnd)}`;
+};
+
 export function RunAnalysisPanel({ onRan }: Props) {
-  const [runName, setRunName] = useState("manual-run");
+  const [runName, setRunName] = useState("analisis-semua-data");
+  const [runNameEdited, setRunNameEdited] = useState(false);
   const [minSupport, setMinSupport] = useState("0.05");
   const [minConfidence, setMinConfidence] = useState("0.3");
   const [minLift, setMinLift] = useState("1.0");
+  const [periodStart, setPeriodStart] = useState("");
+  const [periodEnd, setPeriodEnd] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [ok, setOk] = useState("");
+
+  useEffect(() => {
+    if (!runNameEdited) {
+      setRunName(buildRunName(periodStart, periodEnd));
+    }
+  }, [periodStart, periodEnd, runNameEdited]);
 
   const handleRun = async () => {
     setLoading(true);
@@ -28,6 +51,8 @@ export function RunAnalysisPanel({ onRan }: Props) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           run_name: runName,
+          period_start: periodStart || null,
+          period_end: periodEnd || null,
           min_support: Number(minSupport),
           min_confidence: Number(minConfidence),
           min_lift: Number(minLift),
@@ -37,7 +62,11 @@ export function RunAnalysisPanel({ onRan }: Props) {
         const text = await res.text();
         throw new Error(text || `HTTP ${res.status}`);
       }
-      setOk("Analisis berhasil dijalankan.");
+      const payload = (await res.json()) as { run_name?: string };
+      if (payload.run_name && payload.run_name !== runName) {
+        setRunName(payload.run_name);
+      }
+      setOk(`Analisis berhasil dijalankan: ${payload.run_name ?? runName}.`);
       onRan?.();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Analisis gagal.");
@@ -52,15 +81,34 @@ export function RunAnalysisPanel({ onRan }: Props) {
         <CardTitle>Jalankan Analisis</CardTitle>
       </CardHeader>
       <CardContent className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Input value={runName} onChange={(e) => setRunName(e.target.value)} placeholder="Run name" />
+        <Input
+          value={runName}
+          onChange={(e) => {
+            setRunNameEdited(true);
+            setRunName(e.target.value);
+          }}
+          placeholder="Run name"
+        />
         <Input value={minSupport} onChange={(e) => setMinSupport(e.target.value)} placeholder="Min support" />
         <Input
           value={minConfidence}
           onChange={(e) => setMinConfidence(e.target.value)}
           placeholder="Min confidence"
         />
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <Input value={minLift} onChange={(e) => setMinLift(e.target.value)} placeholder="Min lift" />
+        <Input value={minLift} onChange={(e) => setMinLift(e.target.value)} placeholder="Min lift" />
+        <Input
+          type="date"
+          value={periodStart}
+          onChange={(e) => setPeriodStart(e.target.value)}
+          title="Tanggal awal transaksi yang dianalisis"
+        />
+        <Input
+          type="date"
+          value={periodEnd}
+          onChange={(e) => setPeriodEnd(e.target.value)}
+          title="Tanggal akhir transaksi yang dianalisis"
+        />
+        <div className="flex flex-col gap-2 sm:flex-row lg:col-span-2">
           <Button className="sm:whitespace-nowrap" onClick={handleRun} disabled={loading}>
             {loading ? "Running..." : "Run"}
           </Button>

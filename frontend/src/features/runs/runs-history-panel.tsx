@@ -58,9 +58,9 @@ export function RunsHistoryPanel({ runs, selectedRunId, onSelect, onRefresh, onD
         </div>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto rounded-md border">
+        <div className="max-h-[420px] overflow-auto rounded-md border">
           <Table>
-            <TableHeader>
+            <TableHeader className="sticky top-0 z-10 bg-white">
               <TableRow>
                 <TableHead>ID</TableHead>
                 <TableHead>Run Name</TableHead>

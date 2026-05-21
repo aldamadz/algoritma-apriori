@@ -19,8 +19,9 @@ type Props = {
 export function RuleDetailDialog({ open, onOpenChange, rule }: Props) {
   if (!rule) return null;
 
-  const left = rule.antecedent.join(", ");
-  const right = rule.consequent.join(", ");
+  const cleanLabel = (value: string): string => value.replace(/^(Jurusan|Buku):/, "").trim();
+  const left = rule.antecedent.map(cleanLabel).join(", ");
+  const right = rule.consequent.map(cleanLabel).join(", ");
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -28,7 +29,7 @@ export function RuleDetailDialog({ open, onOpenChange, rule }: Props) {
         <DialogHeader>
           <DialogTitle>Detail Aturan</DialogTitle>
           <DialogDescription>
-            Mahasiswa yang meminjam [{left}] cenderung meminjam [{right}].
+            Mahasiswa dari jurusan [{left}] memiliki kecenderungan meminjam buku [{right}].
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-2 break-words text-sm">

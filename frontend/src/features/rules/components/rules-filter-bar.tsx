@@ -21,11 +21,8 @@ export function RulesFilterBar({ filters, departments, onChange, onReset }: Prop
   const onQueryText = (e: ChangeEvent<HTMLInputElement>) =>
     onChange({ ...filters, q: e.target.value, page: 1 });
 
-  const onDate = (key: "periodStart" | "periodEnd") => (e: ChangeEvent<HTMLInputElement>) =>
-    onChange({ ...filters, [key]: e.target.value, page: 1 });
-
   return (
-    <div className="grid gap-3 rounded-md border p-3 sm:p-4 md:grid-cols-2 xl:grid-cols-6">
+    <div className="grid gap-3 rounded-md border p-3 sm:p-4 md:grid-cols-2 xl:grid-cols-5">
       <Input placeholder="Cari jurusan/buku..." value={filters.q ?? ""} onChange={onQueryText} />
 
       <select
@@ -76,9 +73,7 @@ export function RulesFilterBar({ filters, departments, onChange, onReset }: Prop
           })
         }
       />
-      <Input type="date" value={filters.periodStart ?? ""} onChange={onDate("periodStart")} />
       <div className="flex flex-col gap-2 sm:flex-row">
-        <Input type="date" value={filters.periodEnd ?? ""} onChange={onDate("periodEnd")} />
         <Button variant="outline" onClick={onReset}>
           Reset
         </Button>

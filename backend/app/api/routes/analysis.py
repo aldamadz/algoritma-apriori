@@ -28,6 +28,15 @@ from app.services.apriori_engine import generate_association_rules, generate_fre
 router = APIRouter()
 
 
+def _is_department_to_book_rule(antecedent: list[str], consequent: list[str]) -> bool:
+    return (
+        len(antecedent) == 1
+        and antecedent[0].startswith("Jurusan:")
+        and len(consequent) == 1
+        and consequent[0].startswith("Buku:")
+    )
+
+
 def _to_rule_out(row: AssociationRule) -> RuleOut:
     return RuleOut(
         id=row.id,
@@ -40,10 +49,28 @@ def _to_rule_out(row: AssociationRule) -> RuleOut:
     )
 
 
+def _unique_run_name(db: Session, requested_name: str) -> str:
+    base_name = (requested_name or "analisis-semua-data").strip()[:100]
+    existing = set(
+        db.scalars(
+            select(AnalysisRun.run_name).where(AnalysisRun.run_name.ilike(f"{base_name}%"))
+        )
+    )
+    if base_name not in existing:
+        return base_name
+
+    suffix = 2
+    while True:
+        candidate = f"{base_name}-{suffix}"
+        if candidate not in existing:
+            return candidate
+        suffix += 1
+
+
 @router.post("/run", response_model=AnalysisRunOut, status_code=status.HTTP_201_CREATED)
 def run_analysis(payload: AnalysisRunCreate, db: Session = Depends(get_db)) -> AnalysisRun:
     run = AnalysisRun(
-        run_name=payload.run_name,
+        run_name=_unique_run_name(db, payload.run_name),
         period_start=payload.period_start,
         period_end=payload.period_end,
         min_support=payload.min_support,
@@ -91,6 +118,8 @@ def run_analysis(payload: AnalysisRunCreate, db: Session = Depends(get_db)) -> A
     for rule in rules:
         antecedent = list(rule.antecedent)
         consequent = list(rule.consequent)
+        if not _is_department_to_book_rule(antecedent, consequent):
+            continue
         db.add(
             AssociationRule(
                 analysis_run_id=run.id,

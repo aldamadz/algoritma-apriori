@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { DocumentationPage } from "@/features/docs/documentation-page";
 import { CsvImportPanel } from "@/features/imports/csv-import-panel";
 import { RunAnalysisPanel } from "@/features/imports/run-analysis-panel";
+import { MasterDataPanel } from "@/features/master-data/master-data-panel";
+import { TransactionSummaryPanel } from "@/features/master-data/transaction-summary-panel";
 import { RulesPage } from "@/features/rules";
 import { CompareRunsPanel } from "@/features/runs/compare-runs-panel";
 import { RunsHistoryPanel } from "@/features/runs/runs-history-panel";
@@ -80,6 +82,8 @@ export function App() {
         <div className="mx-auto max-w-7xl space-y-4 p-3 sm:p-4 md:p-6">
           <CsvImportPanel onImported={() => void reloadData()} />
           <RunAnalysisPanel onRan={() => void reloadData()} />
+          <TransactionSummaryPanel />
+          <MasterDataPanel />
           <div className="rounded-md border bg-white p-4 text-sm">
             Belum ada analysis run. Import data lalu klik panel "Jalankan Analisis".
             <Button className="mt-3" variant="outline" onClick={() => void reloadData()}>
@@ -102,6 +106,12 @@ export function App() {
           <CsvImportPanel onImported={() => void reloadData()} />
           <div className="mt-4">
             <RunAnalysisPanel onRan={() => void reloadData()} />
+          </div>
+          <div className="mt-4">
+            <TransactionSummaryPanel />
+          </div>
+          <div className="mt-4">
+            <MasterDataPanel />
           </div>
           <div className="mt-4">
             <RunsHistoryPanel

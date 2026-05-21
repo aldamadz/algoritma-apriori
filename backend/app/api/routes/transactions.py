@@ -2,24 +2,147 @@ import csv
 import io
 from datetime import date
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
-from sqlalchemy import select
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.db.session import get_db
 from app.models import Book, Department, LoanTransaction, LoanTransactionItem, Student
-from app.schemas.common import ImportCsvResult, LoanTransactionCreate, LoanTransactionOut
+from app.schemas.common import (
+    ImportCsvResult,
+    LoanTransactionCreate,
+    LoanTransactionOut,
+    PaginatedTransactionsResponse,
+    RulesMeta,
+    TransactionSummaryResponse,
+)
 
 router = APIRouter()
 
 
-@router.get("", response_model=list[LoanTransactionOut])
-def list_transactions(db: Session = Depends(get_db)) -> list[LoanTransactionOut]:
+STANDARD_REQUIRED_COLUMNS = ["transaction_id", "student_number", "department_code", "loan_date", "book_isbn"]
+REAL_LIBRARY_REQUIRED_COLUMNS = ["no_mhs", "nama", "fakultas", "kd_buku", "judul", "tgl_pinjam"]
+
+
+def _cell(row: dict[str, str], key: str) -> str:
+    return (row.get(key) or "").strip()
+
+
+def _department_code(value: str) -> str:
+    code = "".join(ch for ch in value.upper() if ch.isalnum())
+    return (code or "UNKNOWN")[:30]
+
+
+def _detect_csv_format(headers: list[str]) -> str:
+    if all(column in headers for column in STANDARD_REQUIRED_COLUMNS):
+        return "standard"
+    if all(column in headers for column in REAL_LIBRARY_REQUIRED_COLUMNS):
+        return "real_library"
+
+    standard_missing = [c for c in STANDARD_REQUIRED_COLUMNS if c not in headers]
+    real_missing = [c for c in REAL_LIBRARY_REQUIRED_COLUMNS if c not in headers]
+    raise HTTPException(
+        status_code=400,
+        detail=(
+            "Unsupported CSV columns. "
+            f"Standard missing: {', '.join(standard_missing)}. "
+            f"Real library missing: {', '.join(real_missing)}."
+        ),
+    )
+
+
+def _normalize_import_rows(rows: list[dict[str, str]], csv_format: str) -> list[dict[str, str]]:
+    if csv_format == "standard":
+        return rows
+
+    normalized: list[dict[str, str]] = []
+    for row in rows:
+        student_number = _cell(row, "no_mhs")
+        loan_date = _cell(row, "tgl_pinjam")
+        return_date = _cell(row, "tgl_kembali")
+        department_name = _cell(row, "fakultas") or "Unknown"
+        book_isbn = _cell(row, "kd_buku") or _cell(row, "no_barcode")
+
+        normalized.append(
+            {
+                "transaction_id": f"{student_number}|{loan_date}|{return_date}",
+                "student_number": student_number,
+                "student_name": _cell(row, "nama") or student_number or "Unknown",
+                "department_code": _department_code(department_name),
+                "department_name": department_name,
+                "loan_date": loan_date,
+                "return_date": return_date,
+                "book_isbn": book_isbn,
+                "book_title": _cell(row, "judul") or book_isbn,
+                "book_author": "",
+                "book_category": _cell(row, "label2") or _cell(row, "label1"),
+            }
+        )
+    return normalized
+
+
+@router.get("/summary", response_model=TransactionSummaryResponse)
+def get_transaction_summary(db: Session = Depends(get_db)) -> TransactionSummaryResponse:
+    first_loan_date, last_loan_date, total_transactions = db.execute(
+        select(
+            func.min(LoanTransaction.loan_date),
+            func.max(LoanTransaction.loan_date),
+            func.count(LoanTransaction.id),
+        )
+    ).one()
+
+    month_label = func.to_char(LoanTransaction.loan_date, "YYYY-MM")
+    monthly_rows = db.execute(
+        select(
+            month_label.label("month"),
+            func.count(LoanTransaction.id).label("total"),
+        )
+        .group_by(month_label)
+        .order_by(month_label)
+    ).all()
+
+    return TransactionSummaryResponse(
+        firstLoanDate=first_loan_date,
+        lastLoanDate=last_loan_date,
+        totalTransactions=int(total_transactions or 0),
+        monthly=[{"month": month, "total": int(total)} for month, total in monthly_rows],
+    )
+
+
+@router.get("", response_model=PaginatedTransactionsResponse)
+def list_transactions(
+    db: Session = Depends(get_db),
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=20, ge=1, le=100),
+    q: str | None = None,
+) -> PaginatedTransactionsResponse:
+    base_stmt = select(LoanTransaction).join(LoanTransaction.student).join(Student.department)
+    count_stmt = select(func.count(func.distinct(LoanTransaction.id))).select_from(LoanTransaction).join(LoanTransaction.student).join(Student.department)
+    if q:
+        pattern = f"%{q}%"
+        base_stmt = base_stmt.join(LoanTransaction.items).join(LoanTransactionItem.book)
+        count_stmt = count_stmt.join(LoanTransaction.items).join(LoanTransactionItem.book)
+        condition = or_(
+            Student.student_number.ilike(pattern),
+            Student.name.ilike(pattern),
+            Department.name.ilike(pattern),
+            Book.title.ilike(pattern),
+        )
+        base_stmt = base_stmt.where(condition)
+        count_stmt = count_stmt.where(condition)
+
+    total = int(db.scalar(count_stmt) or 0)
+    total_pages = max(1, (total + limit - 1) // limit)
     rows = (
         db.execute(
-        select(LoanTransaction)
-        .options(joinedload(LoanTransaction.items))
-        .order_by(LoanTransaction.loan_date.desc(), LoanTransaction.id.desc())
+            base_stmt
+            .options(
+                joinedload(LoanTransaction.student).joinedload(Student.department),
+                joinedload(LoanTransaction.items).joinedload(LoanTransactionItem.book),
+            )
+            .order_by(LoanTransaction.loan_date.desc(), LoanTransaction.id.desc())
+            .offset((page - 1) * limit)
+            .limit(limit)
         )
         .unique()
         .scalars()
@@ -31,12 +154,19 @@ def list_transactions(db: Session = Depends(get_db)) -> list[LoanTransactionOut]
             LoanTransactionOut(
                 id=row.id,
                 student_id=row.student_id,
+                student_number=row.student.student_number if row.student else None,
+                student_name=row.student.name if row.student else None,
+                department_name=row.student.department.name if row.student and row.student.department else None,
                 loan_date=row.loan_date,
                 return_date=row.return_date,
                 book_ids=[item.book_id for item in row.items],
+                book_titles=[item.book.title for item in row.items if item.book],
             )
         )
-    return out
+    return PaginatedTransactionsResponse(
+        data=out,
+        meta=RulesMeta(page=page, limit=limit, total=total, totalPages=total_pages),
+    )
 
 
 @router.post("", response_model=LoanTransactionOut, status_code=status.HTTP_201_CREATED)
@@ -75,9 +205,13 @@ def create_transaction(payload: LoanTransactionCreate, db: Session = Depends(get
     return LoanTransactionOut(
         id=row.id,
         student_id=row.student_id,
+        student_number=row.student.student_number if row.student else None,
+        student_name=row.student.name if row.student else None,
+        department_name=row.student.department.name if row.student and row.student.department else None,
         loan_date=row.loan_date,
         return_date=row.return_date,
         book_ids=[item.book_id for item in row.items],
+        book_titles=[item.book.title for item in row.items if item.book],
     )
 
 
@@ -93,13 +227,11 @@ async def import_csv(file: UploadFile = File(...), db: Session = Depends(get_db)
         raise HTTPException(status_code=400, detail="CSV must be UTF-8 encoded.")
 
     reader = csv.DictReader(io.StringIO(decoded))
-    required = ["transaction_id", "student_number", "department_code", "loan_date", "book_isbn"]
     headers = reader.fieldnames or []
-    missing = [c for c in required if c not in headers]
-    if missing:
-        raise HTTPException(status_code=400, detail=f"Missing required columns: {', '.join(missing)}")
+    csv_format = _detect_csv_format(headers)
 
-    rows = list(reader)
+    source_rows = list(reader)
+    rows = _normalize_import_rows(source_rows, csv_format)
     grouped: dict[str, list[dict[str, str]]] = {}
     for row in rows:
         txn_id = (row.get("transaction_id") or "").strip()
@@ -119,6 +251,7 @@ async def import_csv(file: UploadFile = File(...), db: Session = Depends(get_db)
         student_number = (first.get("student_number") or "").strip()
         department_code = (first.get("department_code") or "").strip()
         loan_date_raw = (first.get("loan_date") or "").strip()
+        return_date_raw = (first.get("return_date") or "").strip()
         student_name = (first.get("student_name") or student_number or "Unknown").strip()
         department_name = (first.get("department_name") or department_code or "Unknown").strip()
 
@@ -130,6 +263,12 @@ async def import_csv(file: UploadFile = File(...), db: Session = Depends(get_db)
         except ValueError:
             errors.append(f"transaction_id={txn_id}: invalid loan_date '{loan_date_raw}', expected YYYY-MM-DD")
             continue
+        return_date_value: date | None = None
+        if return_date_raw:
+            try:
+                return_date_value = date.fromisoformat(return_date_raw)
+            except ValueError:
+                errors.append(f"transaction_id={txn_id}: invalid return_date '{return_date_raw}', expected YYYY-MM-DD")
 
         department = db.scalar(select(Department).where(Department.code == department_code))
         if not department:
@@ -149,7 +288,7 @@ async def import_csv(file: UploadFile = File(...), db: Session = Depends(get_db)
             db.flush()
             created_students += 1
 
-        transaction = LoanTransaction(student_id=student.id, loan_date=loan_date_value)
+        transaction = LoanTransaction(student_id=student.id, loan_date=loan_date_value, return_date=return_date_value)
         db.add(transaction)
         db.flush()
         created_transactions += 1
@@ -185,7 +324,7 @@ async def import_csv(file: UploadFile = File(...), db: Session = Depends(get_db)
     db.commit()
 
     return ImportCsvResult(
-        totalRows=len(rows),
+        totalRows=len(source_rows),
         createdTransactions=created_transactions,
         createdTransactionItems=created_items,
         createdDepartments=created_departments,

@@ -27,6 +27,7 @@ class StudentOut(BaseModel):
     student_number: str
     name: str
     department_id: int
+    department_name: str | None = None
 
     class Config:
         from_attributes = True
@@ -60,9 +61,13 @@ class LoanTransactionCreate(BaseModel):
 class LoanTransactionOut(BaseModel):
     id: int
     student_id: int
+    student_number: str | None = None
+    student_name: str | None = None
+    department_name: str | None = None
     loan_date: date
     return_date: date | None
     book_ids: list[int]
+    book_titles: list[str] = Field(default_factory=list)
 
 
 class ImportCsvResult(BaseModel):
@@ -127,3 +132,30 @@ class RulesResponse(BaseModel):
     data: list[RuleOut]
     meta: RulesMeta
     summary: RulesSummary
+
+
+class PaginatedStudentsResponse(BaseModel):
+    data: list[StudentOut]
+    meta: RulesMeta
+
+
+class PaginatedBooksResponse(BaseModel):
+    data: list[BookOut]
+    meta: RulesMeta
+
+
+class PaginatedTransactionsResponse(BaseModel):
+    data: list[LoanTransactionOut]
+    meta: RulesMeta
+
+
+class MonthlyTransactionSummary(BaseModel):
+    month: str
+    total: int
+
+
+class TransactionSummaryResponse(BaseModel):
+    firstLoanDate: date | None = None
+    lastLoanDate: date | None = None
+    totalTransactions: int
+    monthly: list[MonthlyTransactionSummary]

@@ -18,8 +18,6 @@ export type RulesQueryParams = {
   limit?: number;
   sortBy?: "lift" | "confidence" | "support";
   sortDir?: "asc" | "desc";
-  periodStart?: string;
-  periodEnd?: string;
 };
 
 export type RulesApiResponse = {

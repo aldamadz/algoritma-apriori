@@ -3,8 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 export function RulesFilterBar({ filters, departments, onChange, onReset }) {
     const onQueryText = (e) => onChange({ ...filters, q: e.target.value, page: 1 });
-    const onDate = (key) => (e) => onChange({ ...filters, [key]: e.target.value, page: 1 });
-    return (_jsxs("div", { className: "grid gap-3 rounded-md border p-3 sm:p-4 md:grid-cols-2 xl:grid-cols-6", children: [_jsx(Input, { placeholder: "Cari jurusan/buku...", value: filters.q ?? "", onChange: onQueryText }), _jsxs("select", { className: "h-10 rounded-md border border-slate-300 bg-white px-3 text-sm", value: filters.departmentId ?? "all", onChange: (e) => onChange({
+    return (_jsxs("div", { className: "grid gap-3 rounded-md border p-3 sm:p-4 md:grid-cols-2 xl:grid-cols-5", children: [_jsx(Input, { placeholder: "Cari jurusan/buku...", value: filters.q ?? "", onChange: onQueryText }), _jsxs("select", { className: "h-10 rounded-md border border-slate-300 bg-white px-3 text-sm", value: filters.departmentId ?? "all", onChange: (e) => onChange({
                     ...filters,
                     departmentId: e.target.value === "all" ? undefined : e.target.value,
                     page: 1,
@@ -16,5 +15,5 @@ export function RulesFilterBar({ filters, departments, onChange, onReset }) {
                     ...filters,
                     minLift: e.target.value === "" ? undefined : Number(e.target.value),
                     page: 1,
-                }) }), _jsx(Input, { type: "date", value: filters.periodStart ?? "", onChange: onDate("periodStart") }), _jsxs("div", { className: "flex flex-col gap-2 sm:flex-row", children: [_jsx(Input, { type: "date", value: filters.periodEnd ?? "", onChange: onDate("periodEnd") }), _jsx(Button, { variant: "outline", onClick: onReset, children: "Reset" })] })] }));
+                }) }), _jsx("div", { className: "flex flex-col gap-2 sm:flex-row", children: _jsx(Button, { variant: "outline", onClick: onReset, children: "Reset" }) })] }));
 }

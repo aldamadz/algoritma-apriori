@@ -17,10 +17,6 @@ const buildQueryString = (params) => {
         q.set("sort_by", params.sortBy);
     if (params.sortDir)
         q.set("sort_dir", params.sortDir);
-    if (params.periodStart)
-        q.set("period_start", params.periodStart);
-    if (params.periodEnd)
-        q.set("period_end", params.periodEnd);
     return q.toString();
 };
 export const fetchRules = async (params) => {
