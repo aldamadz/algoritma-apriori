@@ -58,7 +58,7 @@ export function CompareRunsPanel({ runs }: Props) {
 
   const runLabel = useMemo(() => {
     const map = new Map<string, string>();
-    runs.forEach((r) => map.set(String(r.id), `${r.id} - ${r.run_name}`));
+    runs.forEach((r, index) => map.set(String(r.id), `#${index + 1} - ${r.run_name}`));
     return map;
   }, [runs]);
 
@@ -107,9 +107,9 @@ export function CompareRunsPanel({ runs }: Props) {
             value={runA}
             onChange={(e) => setRunA(e.target.value)}
           >
-            {runs.map((r) => (
+            {runs.map((r, index) => (
               <option key={`a-${r.id}`} value={r.id}>
-                {r.id} - {r.run_name}
+                #{index + 1} - {r.run_name}
               </option>
             ))}
           </select>
@@ -118,9 +118,9 @@ export function CompareRunsPanel({ runs }: Props) {
             value={runB}
             onChange={(e) => setRunB(e.target.value)}
           >
-            {runs.map((r) => (
+            {runs.map((r, index) => (
               <option key={`b-${r.id}`} value={r.id}>
-                {r.id} - {r.run_name}
+                #{index + 1} - {r.run_name}
               </option>
             ))}
           </select>

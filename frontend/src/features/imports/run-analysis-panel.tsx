@@ -1,4 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { DatePicker } from "antd";
+import type { Dayjs } from "dayjs";
+import dayjs from "dayjs";
+import "antd/dist/reset.css";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,17 +26,48 @@ const buildRunName = (periodStart: string, periodEnd: string): string => {
   return `analisis-sampai-${toDdmmyyyy(periodEnd)}`;
 };
 
+type PeriodMode = "all" | "year" | "month" | "range";
+
+const datePickerClass = "h-10 w-full min-w-0";
+
 export function RunAnalysisPanel({ onRan }: Props) {
   const [runName, setRunName] = useState("analisis-semua-data");
   const [runNameEdited, setRunNameEdited] = useState(false);
   const [minSupport, setMinSupport] = useState("0.05");
   const [minConfidence, setMinConfidence] = useState("0.3");
   const [minLift, setMinLift] = useState("1.0");
-  const [periodStart, setPeriodStart] = useState("");
-  const [periodEnd, setPeriodEnd] = useState("");
+  const [periodMode, setPeriodMode] = useState<PeriodMode>("all");
+  const [selectedYear, setSelectedYear] = useState<Dayjs | null>(dayjs());
+  const [selectedMonth, setSelectedMonth] = useState<Dayjs | null>(dayjs());
+  const [rangeDates, setRangeDates] = useState<[Dayjs | null, Dayjs | null] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [ok, setOk] = useState("");
+
+  const { periodStart, periodEnd } = useMemo(() => {
+    if (periodMode === "all") {
+      return { periodStart: "", periodEnd: "" };
+    }
+    if (periodMode === "year") {
+      if (!selectedYear) return { periodStart: "", periodEnd: "" };
+      return {
+        periodStart: selectedYear.startOf("year").format("YYYY-MM-DD"),
+        periodEnd: selectedYear.endOf("year").format("YYYY-MM-DD"),
+      };
+    }
+    if (periodMode === "month") {
+      if (!selectedMonth) return { periodStart: "", periodEnd: "" };
+      return {
+        periodStart: selectedMonth.startOf("month").format("YYYY-MM-DD"),
+        periodEnd: selectedMonth.endOf("month").format("YYYY-MM-DD"),
+      };
+    }
+    const [start, end] = rangeDates ?? [null, null];
+    return {
+      periodStart: start ? start.format("YYYY-MM-DD") : "",
+      periodEnd: end ? end.format("YYYY-MM-DD") : "",
+    };
+  }, [periodMode, rangeDates, selectedMonth, selectedYear]);
 
   useEffect(() => {
     if (!runNameEdited) {
@@ -63,9 +98,6 @@ export function RunAnalysisPanel({ onRan }: Props) {
         throw new Error(text || `HTTP ${res.status}`);
       }
       const payload = (await res.json()) as { run_name?: string };
-      if (payload.run_name && payload.run_name !== runName) {
-        setRunName(payload.run_name);
-      }
       setOk(`Analisis berhasil dijalankan: ${payload.run_name ?? runName}.`);
       onRan?.();
     } catch (e) {
@@ -96,18 +128,75 @@ export function RunAnalysisPanel({ onRan }: Props) {
           placeholder="Min confidence"
         />
         <Input value={minLift} onChange={(e) => setMinLift(e.target.value)} placeholder="Min lift" />
-        <Input
-          type="date"
-          value={periodStart}
-          onChange={(e) => setPeriodStart(e.target.value)}
-          title="Tanggal awal transaksi yang dianalisis"
-        />
-        <Input
-          type="date"
-          value={periodEnd}
-          onChange={(e) => setPeriodEnd(e.target.value)}
-          title="Tanggal akhir transaksi yang dianalisis"
-        />
+
+        <select
+          className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm"
+          value={periodMode}
+          onChange={(e) => setPeriodMode(e.target.value as PeriodMode)}
+          title="Pilih cakupan tanggal transaksi yang dianalisis"
+        >
+          <option value="all">Semua data</option>
+          <option value="year">Per tahun</option>
+          <option value="month">Per bulan</option>
+          <option value="range">Rentang bulan</option>
+        </select>
+
+        {periodMode === "year" ? (
+          <DatePicker
+            picker="year"
+            value={selectedYear}
+            onChange={(date) => setSelectedYear(date)}
+            className={datePickerClass}
+            placeholder="Pilih tahun"
+          />
+        ) : null}
+
+        {periodMode === "month" ? (
+          <DatePicker
+            picker="month"
+            value={selectedMonth}
+            onChange={(date) => setSelectedMonth(date)}
+            className={datePickerClass}
+            placeholder="Pilih bulan"
+          />
+        ) : null}
+
+        {periodMode === "range" ? (
+          <>
+            <div className="grid min-w-0 gap-3 sm:hidden">
+              <DatePicker
+                value={rangeDates?.[0] ?? null}
+                onChange={(date) => setRangeDates([date, rangeDates?.[1] ?? null])}
+                format="DD/MM/YYYY"
+                className={datePickerClass}
+                popupClassName="max-w-[calc(100vw-24px)]"
+                placement="bottomLeft"
+                placeholder="Tanggal awal"
+              />
+              <DatePicker
+                value={rangeDates?.[1] ?? null}
+                onChange={(date) => setRangeDates([rangeDates?.[0] ?? null, date])}
+                format="DD/MM/YYYY"
+                className={datePickerClass}
+                popupClassName="max-w-[calc(100vw-24px)]"
+                placement="bottomLeft"
+                placeholder="Tanggal akhir"
+              />
+            </div>
+            <div className="hidden min-w-0 sm:col-span-2 sm:block">
+            <DatePicker.RangePicker
+              value={rangeDates}
+              onChange={(dates) => setRangeDates(dates)}
+              format="DD/MM/YYYY"
+              className={`${datePickerClass} max-w-full`}
+              popupClassName="max-w-[calc(100vw-24px)]"
+              placement="bottomLeft"
+              placeholder={["Tanggal awal", "Tanggal akhir"]}
+            />
+            </div>
+          </>
+        ) : null}
+
         <div className="flex flex-col gap-2 sm:flex-row lg:col-span-2">
           <Button className="sm:whitespace-nowrap" onClick={handleRun} disabled={loading}>
             {loading ? "Running..." : "Run"}

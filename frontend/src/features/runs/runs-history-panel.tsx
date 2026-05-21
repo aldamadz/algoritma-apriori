@@ -62,7 +62,7 @@ export function RunsHistoryPanel({ runs, selectedRunId, onSelect, onRefresh, onD
           <Table>
             <TableHeader className="sticky top-0 z-10 bg-white">
               <TableRow>
-                <TableHead>ID</TableHead>
+                <TableHead>#</TableHead>
                 <TableHead>Run Name</TableHead>
                 <TableHead>Parameter</TableHead>
                 <TableHead>Dibuat</TableHead>
@@ -71,9 +71,9 @@ export function RunsHistoryPanel({ runs, selectedRunId, onSelect, onRefresh, onD
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredRuns.map((run) => (
+              {filteredRuns.map((run, index) => (
                 <TableRow key={run.id}>
-                  <TableCell>{run.id}</TableCell>
+                  <TableCell>{index + 1}</TableCell>
                   <TableCell className="whitespace-nowrap">{run.run_name}</TableCell>
                   <TableCell className="whitespace-nowrap">
                     s={run.min_support}, c={run.min_confidence}, lift={run.min_lift}
