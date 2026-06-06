@@ -77,7 +77,19 @@ class ImportCsvResult(BaseModel):
     createdDepartments: int
     createdStudents: int
     createdBooks: int
+    skippedDuplicateTransactions: int = 0
+    removedDuplicateTransactions: int = 0
     errors: list[str]
+
+
+class ResetDataResult(BaseModel):
+    deletedRules: int
+    deletedAnalysisRuns: int
+    deletedTransactionItems: int
+    deletedTransactions: int
+    deletedBooks: int
+    deletedStudents: int
+    deletedDepartments: int
 
 
 class AnalysisRunCreate(BaseModel):

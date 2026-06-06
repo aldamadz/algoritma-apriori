@@ -30,6 +30,7 @@ frontend/.env
 # OS
 .DS_Store
 Thumbs.db
+.~lock.*#
 
 # Local thesis documents
 LAPORAN AKHIR ANISA - REVISI BAB 3 FIX.docx

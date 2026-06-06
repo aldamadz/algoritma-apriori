@@ -64,6 +64,8 @@ export type ImportCsvResult = {
   createdDepartments: number;
   createdStudents: number;
   createdBooks: number;
+  skippedDuplicateTransactions: number;
+  removedDuplicateTransactions: number;
   errors: string[];
 };
 
@@ -77,4 +79,14 @@ export type TransactionSummary = {
   lastLoanDate: string | null;
   totalTransactions: number;
   monthly: MonthlyTransactionSummary[];
+};
+
+export type ResetDataResult = {
+  deletedRules: number;
+  deletedAnalysisRuns: number;
+  deletedTransactionItems: number;
+  deletedTransactions: number;
+  deletedBooks: number;
+  deletedStudents: number;
+  deletedDepartments: number;
 };

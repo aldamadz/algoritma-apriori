@@ -2,17 +2,27 @@ import csv
 import io
 from datetime import date
 
-from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
-from sqlalchemy import func, or_, select
+from fastapi import APIRouter, Depends, File, Header, HTTPException, Query, UploadFile, status
+from sqlalchemy import delete, func, select
+from sqlalchemy import or_
 from sqlalchemy.orm import Session, joinedload
 
 from app.db.session import get_db
-from app.models import Book, Department, LoanTransaction, LoanTransactionItem, Student
+from app.models import (
+    AnalysisRun,
+    AssociationRule,
+    Book,
+    Department,
+    LoanTransaction,
+    LoanTransactionItem,
+    Student,
+)
 from app.schemas.common import (
     ImportCsvResult,
     LoanTransactionCreate,
     LoanTransactionOut,
     PaginatedTransactionsResponse,
+    ResetDataResult,
     RulesMeta,
     TransactionSummaryResponse,
 )
@@ -107,6 +117,45 @@ def get_transaction_summary(db: Session = Depends(get_db)) -> TransactionSummary
         totalTransactions=int(total_transactions or 0),
         monthly=[{"month": month, "total": int(total)} for month, total in monthly_rows],
     )
+
+
+@router.delete("/all-data", response_model=ResetDataResult)
+def reset_all_data(
+    x_confirm_reset: str | None = Header(default=None),
+    db: Session = Depends(get_db),
+) -> ResetDataResult:
+    if x_confirm_reset != "RESET ALL DATA":
+        raise HTTPException(status_code=400, detail="Reset confirmation is required.")
+
+    counts = {
+        "deletedRules": int(db.scalar(select(func.count(AssociationRule.id))) or 0),
+        "deletedAnalysisRuns": int(db.scalar(select(func.count(AnalysisRun.id))) or 0),
+        "deletedTransactionItems": int(
+            db.scalar(select(func.count(LoanTransactionItem.id))) or 0
+        ),
+        "deletedTransactions": int(db.scalar(select(func.count(LoanTransaction.id))) or 0),
+        "deletedBooks": int(db.scalar(select(func.count(Book.id))) or 0),
+        "deletedStudents": int(db.scalar(select(func.count(Student.id))) or 0),
+        "deletedDepartments": int(db.scalar(select(func.count(Department.id))) or 0),
+    }
+
+    try:
+        for model in (
+            AssociationRule,
+            AnalysisRun,
+            LoanTransactionItem,
+            LoanTransaction,
+            Book,
+            Student,
+            Department,
+        ):
+            db.execute(delete(model))
+        db.commit()
+    except Exception:
+        db.rollback()
+        raise
+
+    return ResetDataResult(**counts)
 
 
 @router.get("", response_model=PaginatedTransactionsResponse)
@@ -244,6 +293,8 @@ async def import_csv(file: UploadFile = File(...), db: Session = Depends(get_db)
     created_departments = 0
     created_students = 0
     created_books = 0
+    skipped_duplicate_transactions = 0
+    removed_duplicate_transactions = 0
     errors: list[str] = []
 
     for txn_id, group_rows in grouped.items():
@@ -288,12 +339,7 @@ async def import_csv(file: UploadFile = File(...), db: Session = Depends(get_db)
             db.flush()
             created_students += 1
 
-        transaction = LoanTransaction(student_id=student.id, loan_date=loan_date_value, return_date=return_date_value)
-        db.add(transaction)
-        db.flush()
-        created_transactions += 1
-
-        seen_book_ids: set[int] = set()
+        books_by_id: dict[int, Book] = {}
         for row in group_rows:
             book_isbn = (row.get("book_isbn") or "").strip()
             if not book_isbn:
@@ -315,10 +361,50 @@ async def import_csv(file: UploadFile = File(...), db: Session = Depends(get_db)
                 db.flush()
                 created_books += 1
 
-            if book.id in seen_book_ids:
-                continue
-            seen_book_ids.add(book.id)
-            db.add(LoanTransactionItem(transaction_id=transaction.id, book_id=book.id))
+            books_by_id[book.id] = book
+
+        if not books_by_id:
+            errors.append(f"transaction_id={txn_id}: no valid books")
+            continue
+
+        existing_transactions = (
+            db.execute(
+                select(LoanTransaction)
+                .options(joinedload(LoanTransaction.items))
+                .where(
+                    LoanTransaction.student_id == student.id,
+                    LoanTransaction.loan_date == loan_date_value,
+                    LoanTransaction.return_date == return_date_value,
+                )
+            )
+            .unique()
+            .scalars()
+            .all()
+        )
+        imported_book_ids = set(books_by_id)
+        matching_transactions = [
+            existing
+            for existing in existing_transactions
+            if {item.book_id for item in existing.items} == imported_book_ids
+        ]
+        if matching_transactions:
+            for duplicate in matching_transactions[1:]:
+                db.delete(duplicate)
+                removed_duplicate_transactions += 1
+            skipped_duplicate_transactions += 1
+            continue
+
+        transaction = LoanTransaction(
+            student_id=student.id,
+            loan_date=loan_date_value,
+            return_date=return_date_value,
+        )
+        db.add(transaction)
+        db.flush()
+        created_transactions += 1
+
+        for book_id in imported_book_ids:
+            db.add(LoanTransactionItem(transaction_id=transaction.id, book_id=book_id))
             created_items += 1
 
     db.commit()
@@ -330,5 +416,7 @@ async def import_csv(file: UploadFile = File(...), db: Session = Depends(get_db)
         createdDepartments=created_departments,
         createdStudents=created_students,
         createdBooks=created_books,
+        skippedDuplicateTransactions=skipped_duplicate_transactions,
+        removedDuplicateTransactions=removed_duplicate_transactions,
         errors=errors,
     )
