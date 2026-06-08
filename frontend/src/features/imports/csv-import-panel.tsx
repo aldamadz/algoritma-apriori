@@ -97,6 +97,37 @@ export function CsvImportPanel({ onImported }: Props) {
     }
   };
 
+  const handleReset = async () => {
+    const confirmed = window.confirm(
+      "Hapus seluruh dataset, transaksi, buku, mahasiswa, fakultas, dan hasil analisis? Tindakan ini tidak dapat dibatalkan.",
+    );
+    if (!confirmed) return;
+
+    setResetting(true);
+    setError("");
+    setResult(null);
+    setResetResult(null);
+    try {
+      const base = import.meta.env.VITE_API_BASE_URL ?? "";
+      const res = await fetch(`${base}/api/transactions/all-data`, {
+        method: "DELETE",
+        headers: { "X-Confirm-Reset": "RESET ALL DATA" },
+      });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `HTTP ${res.status}`);
+      }
+      const json = (await res.json()) as ResetDataResult;
+      setResetResult(json);
+      setFile(null);
+      onImported?.();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Reset data gagal.");
+    } finally {
+      setResetting(false);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -153,11 +184,22 @@ export function CsvImportPanel({ onImported }: Props) {
             <div>Department baru: {result.createdDepartments}</div>
             <div>Student baru: {result.createdStudents}</div>
             <div>Buku baru: {result.createdBooks}</div>
+            <div>Transaksi duplikat dilewati: {result.skippedDuplicateTransactions}</div>
+            <div>Duplikat lama dibersihkan: {result.removedDuplicateTransactions}</div>
             {result.errors.length > 0 ? (
               <div className="break-words pt-1 text-amber-700">
                 Error baris ({result.errors.length}): {result.errors.slice(0, 5).join(" | ")}
               </div>
             ) : null}
+          </div>
+        ) : null}
+        {resetResult ? (
+          <div className="space-y-1 text-sm text-emerald-700">
+            <div>Database berhasil dibersihkan.</div>
+            <div>Transaksi dihapus: {resetResult.deletedTransactions}</div>
+            <div>Item transaksi dihapus: {resetResult.deletedTransactionItems}</div>
+            <div>Hasil analisis dihapus: {resetResult.deletedAnalysisRuns}</div>
+            <div>Rules dihapus: {resetResult.deletedRules}</div>
           </div>
         ) : null}
       </CardContent>
