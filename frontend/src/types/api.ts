@@ -67,6 +67,14 @@ export type ImportCsvResult = {
   errors: string[];
 };
 
+export type ClearDatasetResult = {
+  deletedTransactions: number;
+  deletedBooks: number;
+  deletedStudents: number;
+  deletedDepartments: number;
+  deletedAnalysisRuns: number;
+};
+
 export type MonthlyTransactionSummary = {
   month: string;
   total: number;

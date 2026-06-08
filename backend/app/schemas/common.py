@@ -80,6 +80,14 @@ class ImportCsvResult(BaseModel):
     errors: list[str]
 
 
+class ClearDatasetResult(BaseModel):
+    deletedTransactions: int
+    deletedBooks: int
+    deletedStudents: int
+    deletedDepartments: int
+    deletedAnalysisRuns: int
+
+
 class AnalysisRunCreate(BaseModel):
     run_name: str = "manual-run"
     period_start: date | None = None

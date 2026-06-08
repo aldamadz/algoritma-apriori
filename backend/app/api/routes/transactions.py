@@ -3,12 +3,13 @@ import io
 from datetime import date
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
-from sqlalchemy import func, or_, select
+from sqlalchemy import func, or_, select, text
 from sqlalchemy.orm import Session, joinedload
 
 from app.db.session import get_db
 from app.models import Book, Department, LoanTransaction, LoanTransactionItem, Student
 from app.schemas.common import (
+    ClearDatasetResult,
     ImportCsvResult,
     LoanTransactionCreate,
     LoanTransactionOut,
@@ -212,6 +213,44 @@ def create_transaction(payload: LoanTransactionCreate, db: Session = Depends(get
         return_date=row.return_date,
         book_ids=[item.book_id for item in row.items],
         book_titles=[item.book.title for item in row.items if item.book],
+    )
+
+
+@router.delete("/dataset", response_model=ClearDatasetResult, status_code=status.HTTP_200_OK)
+def clear_dataset(db: Session = Depends(get_db)) -> ClearDatasetResult:
+    deleted_transactions = int(db.scalar(select(func.count(LoanTransaction.id))) or 0)
+    deleted_books = int(db.scalar(select(func.count(Book.id))) or 0)
+    deleted_students = int(db.scalar(select(func.count(Student.id))) or 0)
+    deleted_departments = int(db.scalar(select(func.count(Department.id))) or 0)
+
+    analysis_count = db.execute(text("SELECT to_regclass('analysis_runs')")).scalar_one_or_none()
+    deleted_analysis_runs = 0
+    if analysis_count:
+        deleted_analysis_runs = int(db.execute(text("SELECT COUNT(*) FROM analysis_runs")).scalar_one() or 0)
+
+    db.execute(
+        text(
+            """
+            TRUNCATE TABLE
+              association_rules,
+              analysis_runs,
+              loan_transaction_items,
+              loan_transactions,
+              books,
+              students,
+              departments
+            RESTART IDENTITY CASCADE
+            """
+        )
+    )
+    db.commit()
+
+    return ClearDatasetResult(
+        deletedTransactions=deleted_transactions,
+        deletedBooks=deleted_books,
+        deletedStudents=deleted_students,
+        deletedDepartments=deleted_departments,
+        deletedAnalysisRuns=deleted_analysis_runs,
     )
 
 

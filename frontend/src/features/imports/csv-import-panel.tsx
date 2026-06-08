@@ -1,19 +1,70 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import type { ImportCsvResult } from "@/types/api";
+import type { ClearDatasetResult, ImportCsvResult } from "@/types/api";
 
 type Props = {
   onImported?: () => void;
 };
 
+const importSteps = [
+  "Validasi file CSV",
+  "Membaca isi file",
+  "Mendeteksi format kolom dataset",
+  "Preprocessing: normalisasi jurusan, mahasiswa, buku, dan tanggal",
+  "Mengelompokkan baris menjadi transaksi peminjaman",
+  "Menyimpan data master mahasiswa, jurusan, dan buku",
+  "Menyimpan transaksi peminjaman dan item buku",
+  "Finalisasi hasil import",
+];
+
 export function CsvImportPanel({ onImported }: Props) {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [clearing, setClearing] = useState(false);
+  const [stepIndex, setStepIndex] = useState(0);
   const [result, setResult] = useState<ImportCsvResult | null>(null);
+  const [clearResult, setClearResult] = useState<ClearDatasetResult | null>(null);
   const [error, setError] = useState<string>("");
+
+  useEffect(() => {
+    if (!loading) return;
+
+    setStepIndex(0);
+    const timer = window.setInterval(() => {
+      setStepIndex((current) => Math.min(current + 1, importSteps.length - 1));
+    }, 900);
+
+    return () => window.clearInterval(timer);
+  }, [loading]);
+
+  const clearDataset = async () => {
+    const confirmed = window.confirm(
+      "Kosongkan semua data import dan riwayat analisis? Gunakan ini sebelum import dataset baru."
+    );
+    if (!confirmed) return;
+
+    setClearing(true);
+    setError("");
+    setResult(null);
+    setClearResult(null);
+    try {
+      const base = import.meta.env.VITE_API_BASE_URL ?? "";
+      const res = await fetch(`${base}/api/transactions/dataset`, { method: "DELETE" });
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(text || `HTTP ${res.status}`);
+      }
+      setClearResult((await res.json()) as ClearDatasetResult);
+      onImported?.();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Gagal mengosongkan dataset.");
+    } finally {
+      setClearing(false);
+    }
+  };
 
   const handleImport = async () => {
     if (!file) {
@@ -37,6 +88,7 @@ export function CsvImportPanel({ onImported }: Props) {
       }
       const json = (await res.json()) as ImportCsvResult;
       setResult(json);
+      setStepIndex(importSteps.length - 1);
       onImported?.();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Import gagal.");
@@ -59,10 +111,40 @@ export function CsvImportPanel({ onImported }: Props) {
           accept=".csv"
           onChange={(e) => setFile(e.target.files?.[0] ?? null)}
         />
-        <Button onClick={handleImport} disabled={loading}>
-          {loading ? "Importing..." : "Import CSV"}
-        </Button>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Button onClick={handleImport} disabled={loading || clearing}>
+            {loading ? "Mengimport..." : "Import CSV"}
+          </Button>
+          <Button variant="outline" onClick={() => void clearDataset()} disabled={loading || clearing}>
+            {clearing ? "Mengosongkan..." : "Kosongkan Dataset"}
+          </Button>
+        </div>
+        {loading ? (
+          <div className="rounded-md border bg-slate-50 p-3 text-sm">
+            <div className="font-medium">Preprocessing dataset...</div>
+            <div className="mt-2 space-y-1">
+              {importSteps.map((step, index) => (
+                <div
+                  key={step}
+                  className={index <= stepIndex ? "text-slate-900" : "text-slate-400"}
+                >
+                  {index < stepIndex ? "✓" : index === stepIndex ? "•" : "○"} {step}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : null}
         {error ? <div className="break-words text-sm text-red-600">{error}</div> : null}
+        {clearResult ? (
+          <div className="space-y-1 rounded-md border bg-amber-50 p-3 text-sm text-amber-900">
+            <div>Dataset berhasil dikosongkan.</div>
+            <div>Transaksi dihapus: {clearResult.deletedTransactions}</div>
+            <div>Buku dihapus: {clearResult.deletedBooks}</div>
+            <div>Mahasiswa dihapus: {clearResult.deletedStudents}</div>
+            <div>Jurusan dihapus: {clearResult.deletedDepartments}</div>
+            <div>Riwayat analisis dihapus: {clearResult.deletedAnalysisRuns}</div>
+          </div>
+        ) : null}
         {result ? (
           <div className="space-y-1 text-sm">
             <div>Total baris: {result.totalRows}</div>
