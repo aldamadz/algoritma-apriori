@@ -1,43 +1,72 @@
-# Frontend Skeleton Rules Page
+﻿# Frontend Apriori Engine
 
-Folder ini berisi skeleton komponen React + shadcn untuk halaman hasil aturan asosiasi.
+Frontend adalah aplikasi React/Vite untuk mengoperasikan sistem Apriori Engine.
 
-## Lokasi
+## 1. Stack
 
-- `frontend/src/features/rules`
+- React
+- Vite
+- TypeScript
+- Tailwind CSS
+- TanStack Query
+- Ant Design DatePicker
+- React Helmet Async
 
-## Cara Pakai Cepat
+## 2. Run Lokal
 
-1. Pastikan project Vite React TS sudah punya:
-- `@tanstack/react-query`
-- komponen shadcn (`button`, `card`, `dialog`, `input`, `select`, `table`, `badge`)
+```bat
+cd frontend
+npm install
+copy .env.example .env
+npm run dev
+```
 
-2. Set env:
+Isi `.env` lokal:
 
 ```env
-VITE_API_BASE_URL=http://localhost:3000
+VITE_API_BASE_URL=http://localhost:8000
 ```
 
-3. Render halaman:
+## 3. Build Production
 
-```tsx
-import { RulesPage } from "@/features/rules";
-
-export default function RulesRoute() {
-  return (
-    <RulesPage
-      analysisRunId="run_2026_04_13"
-      departments={[
-        { label: "Teknik Informatika", value: "dept_ti" },
-        { label: "Sistem Informasi", value: "dept_si" },
-      ]}
-    />
-  );
-}
+```powershell
+cd frontend
+$env:VITE_API_BASE_URL='https://api.anisaaaaa.sbs'
+npm run build
 ```
 
-## Catatan
+Hasil build berada di:
 
-- Komponen ini asumsi backend tersedia di:
-- `GET /api/analysis/runs/:id/rules`
-- Pastikan alias path `@/` sudah dikonfigurasi di Vite/TSConfig.
+```text
+frontend/dist
+```
+
+Upload isi folder tersebut ke domain frontend hosting:
+
+```text
+/home/wurdgtgl/anisaaaaa.sbs
+```
+
+## 4. Dokumentasi Web
+
+Dokumen yang tampil di halaman `/dokumentasi` berada di:
+
+```text
+frontend/public/docs
+```
+
+Jika mengubah dokumentasi, jalankan build ulang lalu upload `dist` lagi.
+
+## 5. Route Penting
+
+- `/` dashboard utama
+- `/dokumentasi` daftar dokumentasi
+- `/dokumentasi/penggunaan_sistem`
+- `/dokumentasi/kebutuhan_sistem`
+- `/dokumentasi/deployment_production`
+- `/dokumentasi/api_backend`
+- `/dokumentasi/diagram_skripsi`
+
+## 6. Catatan Hosting
+
+Karena frontend memakai React SPA, `.htaccess` domain frontend harus mengarahkan route yang tidak berupa file ke `index.html`.

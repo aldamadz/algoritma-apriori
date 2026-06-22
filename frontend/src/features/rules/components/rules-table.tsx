@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/table";
 
 import type { AssociationRule } from "../types";
-import { toLift, toPercent } from "../utils";
+import { formatRuleItem, toLift, toPercent } from "../utils";
 import { RuleStrengthBadge } from "./rule-strength-badge";
 
 type Props = {
@@ -39,8 +39,12 @@ export function RulesTable({ rules, page, limit, onViewDetail }: Props) {
           {rules.map((rule, index) => (
             <TableRow key={rule.id}>
               <TableCell>{(page - 1) * limit + index + 1}</TableCell>
-              <TableCell className="min-w-[220px] break-words">{rule.antecedent.join(", ")}</TableCell>
-              <TableCell className="min-w-[220px] break-words">{rule.consequent.join(", ")}</TableCell>
+              <TableCell className="min-w-[220px] break-words">
+                {rule.antecedent.map(formatRuleItem).join(", ")}
+              </TableCell>
+              <TableCell className="min-w-[220px] break-words">
+                {rule.consequent.map(formatRuleItem).join(", ")}
+              </TableCell>
               <TableCell className="whitespace-nowrap">{toPercent(rule.support)}</TableCell>
               <TableCell className="whitespace-nowrap">{toPercent(rule.confidence)}</TableCell>
               <TableCell className="whitespace-nowrap">{toLift(rule.lift)}</TableCell>

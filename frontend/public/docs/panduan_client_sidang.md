@@ -1,59 +1,96 @@
-# Panduan Client dan Sidang
+﻿# Panduan Client dan Sidang
 
-## A. Narasi Ringkas ke Client
+Dokumen ini membantu client/operator dan mahasiswa menjelaskan sistem saat demo atau sidang.
 
-Narasi yang direkomendasikan:
+## 1. Narasi Singkat Sistem
 
-"Sistem membaca data peminjaman, membentuk pola, lalu menghasilkan aturan hubungan antara jurusan dan buku.  
-Hasil aturan dipakai sebagai dasar rekomendasi pengadaan dan evaluasi koleksi."
+Sistem ini membaca data peminjaman perpustakaan, mengubahnya menjadi transaksi, lalu mencari pola hubungan antara fakultas mahasiswa dan buku yang dipinjam menggunakan algoritma Apriori.
 
-## B. Makna Metrik (Versi Singkat)
+Hasil akhirnya berupa aturan seperti:
 
-- `Support`: seberapa sering pola muncul di seluruh transaksi.
-- `Confidence`: seberapa sering konsekuen benar saat anteseden terjadi.
-- `Lift`: seberapa bermakna hubungan dibanding kebetulan.
-- Rule operasional umumnya diprioritaskan jika `lift > 1`.
+`Jika mahasiswa berasal dari Fakultas A, maka cenderung meminjam Buku B.`
 
-## C. Alur Demo Sidang (5-7 menit)
+Aturan ini dapat dipakai sebagai bahan evaluasi koleksi, rekomendasi pengadaan buku, dan analisis kebutuhan literatur tiap fakultas.
 
-1. Tampilkan tujuan sistem.
-2. Tampilkan format data dan proses import.
-3. Tunjukkan run analisis dan hasil rules.
-4. Tunjukkan riwayat run + perbandingan 2 run.
-5. Berikan kesimpulan rekomendasi koleksi.
+## 2. Alur Demo 5-7 Menit
 
-## D. Skrip Jawaban Cepat saat Ditanya Dosen
+1. Buka aplikasi web.
+2. Tunjukkan panel import CSV.
+3. Jelaskan bahwa sistem melakukan preprocessing data.
+4. Jalankan analisis Apriori dengan parameter tertentu.
+5. Tampilkan tabel hasil rule.
+6. Buka detail rule dan jelaskan support, confidence, lift.
+7. Tunjukkan riwayat run dan compare run.
+8. Tampilkan halaman dokumentasi/diagram jika ditanya perancangan sistem.
 
-### "Kenapa pakai Apriori?"
-- Karena sesuai untuk association rules dan mudah diinterpretasi untuk data transaksi.
+## 3. Penjelasan Metrik untuk Sidang
 
-### "Kenapa ada threshold support/confidence?"
-- Untuk mengendalikan kualitas aturan dan mengurangi noise.
+### Support
 
-### "Kenapa butuh lift?"
-- Karena confidence saja belum cukup; lift mengukur kekuatan terhadap baseline.
+Support menunjukkan seberapa sering kombinasi `Jika` dan `Maka` muncul pada seluruh transaksi.
 
-### "Kenapa ada notebook dan web?"
-- Notebook untuk validasi eksperimen.
-- Web untuk operasional harian user perpustakaan.
+Contoh: support 2% berarti 2 dari 100 transaksi mengandung kombinasi tersebut.
 
-### "Kenapa run lama tidak hilang meski ada run baru?"
-- Karena tiap run disimpan sebagai riwayat analisis untuk audit dan perbandingan periodik.
+### Confidence
 
-## E. Checklist Sebelum Presentasi
+Confidence menunjukkan seberapa sering bagian `Maka` benar ketika bagian `Jika` terjadi.
 
-- Data demo siap (1000/5000 transaksi atau data riil).
-- Sistem web berjalan (`frontend/backend` up, DB sesuai mode lokal/server).
-- Minimal 2 run tersedia untuk demo compare.
-- Top rules sudah dipahami interpretasinya.
-- Notebook dapat dibuka jika diperlukan lampiran eksperimen.
+Contoh: confidence 40% berarti dari semua transaksi yang memenuhi `Jika`, sebanyak 40% juga memenuhi `Maka`.
 
-## F. Command Cadangan (Jika Notebook Bermasalah)
+### Lift
 
-```bat
-python apriori_user_view.py --csv data/sample_transactions.csv --min-support 0.05 --min-confidence 0.3 --min-lift 0.8 --top-n 10 --json-out outputs/rules_backend.json
-```
+Lift menunjukkan apakah hubungan tersebut lebih kuat daripada kejadian acak.
 
-```bat
-python apriori_experiment.py --csv data/sample_transactions.csv --supports 0.2,0.3,0.4 --confidences 0.5,0.6,0.7 --out-dir outputs/experiment_output
-```
+- `lift > 1`: hubungan lebih kuat dari kebetulan
+- `lift = 1`: hubungan netral
+- `lift < 1`: hubungan lemah
+
+## 4. Jawaban Singkat Jika Ditanya Dosen
+
+### Kenapa memakai Apriori?
+
+Karena Apriori cocok untuk mencari association rules pada data transaksi, dan hasilnya mudah dijelaskan dalam bentuk `Jika -> Maka`.
+
+### Kenapa memakai web jika eksperimen bisa di notebook?
+
+Notebook digunakan untuk validasi metode dan dokumentasi eksperimen. Web digunakan agar client/operator dapat mengimport data, menjalankan analisis, dan membaca hasil tanpa membuka kode Python.
+
+### Kenapa hasil bisa kosong?
+
+Biasanya karena threshold support atau confidence terlalu tinggi, sehingga tidak ada pola yang memenuhi batas minimal.
+
+### Kenapa lift penting?
+
+Confidence saja bisa menipu jika buku tertentu memang sering dipinjam oleh semua fakultas. Lift membantu melihat apakah hubungan fakultas dan buku benar-benar lebih kuat dari baseline.
+
+### Kenapa ada riwayat run?
+
+Agar hasil analisis dapat dibandingkan antar parameter atau antar periode data.
+
+## 5. Checklist Sebelum Presentasi
+
+- Pastikan API aktif: https://api.anisaaaaa.sbs/api/health
+- Pastikan web aktif: https://anisaaaaa.sbs
+- Siapkan dataset CSV yang valid.
+- Jika ingin demo dari nol, klik `Kosongkan Dataset` terlebih dahulu.
+- Import dataset.
+- Jalankan minimal satu analisis.
+- Siapkan contoh satu rule yang akan dijelaskan.
+- Buka halaman `/dokumentasi/diagram_skripsi` jika perlu menunjukkan ERD/diagram.
+
+## 6. Contoh Penjelasan Rule
+
+Rule:
+
+`Jika Fakultas:Teknik Informatika maka Buku:Data Mining`
+
+Penjelasan:
+
+Berdasarkan data peminjaman, mahasiswa Teknik Informatika memiliki kecenderungan meminjam buku Data Mining. Nilai support menunjukkan seberapa sering pola ini muncul pada seluruh transaksi. Nilai confidence menunjukkan peluang buku tersebut dipinjam ketika transaksinya berasal dari fakultas tersebut. Nilai lift menunjukkan apakah hubungan itu lebih kuat dibanding peminjaman acak.
+
+## 7. Catatan untuk Client
+
+- Client tidak perlu menjalankan Jupyter Notebook untuk memakai sistem web.
+- Client cukup mengakses web, upload CSV, dan membaca hasil.
+- Jika dataset berubah total, kosongkan dataset terlebih dahulu agar analisis tidak tercampur.
+- Jika hanya ingin menambahkan data baru, import CSV tanpa mengosongkan dataset.

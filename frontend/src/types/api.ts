@@ -89,12 +89,3 @@ export type TransactionSummary = {
   monthly: MonthlyTransactionSummary[];
 };
 
-export type ResetDataResult = {
-  deletedRules: number;
-  deletedAnalysisRuns: number;
-  deletedTransactionItems: number;
-  deletedTransactions: number;
-  deletedBooks: number;
-  deletedStudents: number;
-  deletedDepartments: number;
-};

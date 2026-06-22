@@ -1,154 +1,165 @@
-# Sistem Analisis Pola Peminjaman Perpustakaan (Apriori Engine)
+﻿# Kebutuhan Sistem Apriori Engine
 
-Dokumen ini adalah versi **as-built** (sesuai implementasi yang sudah terpasang saat ini), bukan rencana awal.
+Dokumen ini menjelaskan kebutuhan sistem sesuai implementasi yang sedang digunakan.
 
 ## 1. Tujuan Sistem
 
-- Menambang aturan asosiasi antara item `Jurusan:*` dan `Buku:*` dari transaksi peminjaman.
-- Menyediakan antarmuka web untuk import data, menjalankan analisis, melihat hasil, dan membandingkan run.
+Sistem dibuat untuk menemukan pola asosiasi antara fakultas mahasiswa dan koleksi buku yang dipinjam. Hasilnya digunakan untuk membantu evaluasi koleksi, rekomendasi pengadaan, dan bahan analisis skripsi berbasis data mining.
 
-## 2. Teknologi yang Terpasang
+## 2. Stack Production yang Terpasang
 
-- Frontend: `React + Vite + TypeScript + Tailwind`
-- UI Components: komponen internal kompatibel pola `shadcn` (`card`, `button`, `table`, `dialog`, dll)
-- Backend API: `FastAPI + SQLAlchemy`
-- Data Mining Engine: Python Apriori (custom implementation)
-- Database:
-  - Local/dev cepat: `SQLite` (default di config)
-  - Container/production baseline: `PostgreSQL`
-- Container: `Docker + Docker Compose`
-- Reverse proxy frontend: `Nginx` (dengan proxy `/api`)
+### Frontend
 
-## 3. Fitur yang Sudah Ada
+- React
+- Vite
+- TypeScript
+- Tailwind CSS
+- Komponen UI internal bergaya shadcn
+- Ant Design DatePicker
+- TanStack Query
+- React Helmet Async
 
-- Import transaksi via CSV dari frontend.
-- Jalankan analisis Apriori dari frontend.
-- Riwayat run analisis:
-  - pilih run aktif
-  - filter bulan
-  - hapus run
-  - bandingkan 2 run
-- Tabel aturan asosiasi:
-  - support, confidence, lift
-  - filter, pagination, detail rule
-- Halaman dokumentasi web:
-  - `/dokumentasi`
-  - `/dokumentasi/penggunaan_sistem`
-  - `/dokumentasi/kebutuhan_sistem`
-  - dst.
+Alamat production:
 
-## 4. Fitur yang Belum Diimplementasikan
+- https://anisaaaaa.sbs
 
-- Auth/login multi-user.
-- Role-based access control.
-- Ekspor PDF/Excel.
-- Scheduler analisis otomatis.
-- Observability production penuh (metrics tracing dashboard).
+### Backend
 
-## 5. Desain Data (Aktif)
+- FastAPI
+- SQLAlchemy
+- Psycopg 3
+- Pydantic Settings
+- Python 3.9.23 pada hosting
+- Passenger WSGI pada cPanel/LiteSpeed
+- Adapter WSGI custom untuk menjalankan FastAPI pada shared hosting
 
-Tabel utama:
-- `departments`
-- `students`
-- `books`
-- `loan_transactions`
-- `loan_transaction_items`
-- `analysis_runs`
-- `association_rules`
+Alamat production:
 
-Catatan:
-- Tabel `users` dan `frequent_itemsets` belum dipakai di implementasi saat ini.
+- https://api.anisaaaaa.sbs
 
-## 6. Endpoint API (Aktif)
+### Database
 
-Health:
-- `GET /api/health`
+- PostgreSQL hosting
+- Database: `wurdgtgl_apriori_db`
+- Tabel dibuat otomatis saat aplikasi backend startup
 
-Master:
-- `GET/POST /api/departments`
-- `GET/POST /api/students`
-- `GET/POST /api/books`
+### Eksperimen Akademik
 
-Transaksi:
-- `GET /api/transactions`
-- `POST /api/transactions`
-- `POST /api/transactions/import-csv`
+- Jupyter Notebook untuk validasi metode, eksplorasi dataset, grafik, dan bahan laporan skripsi
+- Script Python Apriori standalone untuk eksperimen non-web
 
-Analisis:
-- `POST /api/analysis/run`
-- `GET /api/analysis/runs`
-- `GET /api/analysis/runs/{id}`
-- `DELETE /api/analysis/runs/{id}`
-- `GET /api/analysis/runs/{id}/rules`
+## 3. Kebutuhan Browser User
 
-## 7. Format CSV Import (Aktif)
+User cukup memakai browser modern:
 
-Kolom wajib:
-- `transaction_id`
-- `student_number`
-- `department_code`
-- `loan_date` (`YYYY-MM-DD`)
-- `book_isbn`
+- Google Chrome
+- Microsoft Edge
+- Mozilla Firefox
 
-Kolom opsional:
-- `student_name`
-- `department_name`
-- `book_title`
-- `book_author`
-- `book_category`
+Tidak perlu install Python, Node.js, atau PostgreSQL untuk memakai sistem production.
 
-## 8. Alur Analisis di Sistem
+## 4. Kebutuhan Operator/Admin
 
-1. User import CSV.
-2. Sistem menyimpan master dan transaksi.
-3. User menjalankan `POST /api/analysis/run` (via panel frontend).
-4. Backend membentuk basket per transaksi:
-- `Jurusan:{nama_jurusan}`
-- `Buku:{judul_buku}`
-5. Engine Apriori menghitung rules.
-6. Rule disimpan ke `association_rules`.
-7. Frontend menampilkan hasil berdasarkan `run_id`.
+Operator perlu memahami:
 
-## 9. Rekomendasi Parameter Operasional
+- format CSV yang didukung
+- cara mengosongkan dataset sebelum import dataset baru
+- cara memilih parameter support, confidence, dan lift
+- cara membaca rule hasil Apriori
+- cara menggunakan riwayat run dan compare run
 
-Untuk dataset besar acak (mis. 1000+ transaksi):
-- `min_support = 0.05`
-- `min_confidence = 0.30`
-- `min_lift = 0.8` saat mining
+## 5. Kebutuhan Server Production
 
-Untuk filter tampilan hasil:
-- `min_confidence >= 0.30`
-- `min_lift >= 1.0`
+Server production yang dipakai saat ini:
 
-## 10. Deployment yang Digunakan
+- hosting dengan dukungan Python App
+- PostgreSQL
+- domain/subdomain
+- SSL aktif
+- akses File Manager atau SSH
 
-Service Docker Compose:
-- `frontend` (Nginx + static Vite build)
-- `backend` (FastAPI)
-- `postgres` (PostgreSQL) untuk mode lokal
+Konfigurasi domain:
 
-Catatan mode server:
-- tersedia file `docker-compose.server.yml`
-- backend menggunakan PostgreSQL existing container/host
+- Frontend statis: `anisaaaaa.sbs`
+- Backend API: `api.anisaaaaa.sbs`
 
-Command:
+Environment backend yang dibutuhkan:
+
+```env
+APP_ENV=production
+DEBUG=false
+DATABASE_URL=postgresql+psycopg://USER:PASSWORD@/DB_NAME?host=/var/run/postgresql
+CORS_ORIGINS=https://anisaaaaa.sbs,https://www.anisaaaaa.sbs
+```
+
+## 6. Struktur Data Utama
+
+Tabel aktif:
+
+- `departments`: data fakultas
+- `students`: data mahasiswa
+- `books`: data buku
+- `loan_transactions`: data transaksi peminjaman
+- `loan_transaction_items`: daftar buku pada setiap transaksi
+- `analysis_runs`: riwayat eksekusi analisis
+- `association_rules`: hasil aturan asosiasi
+
+## 7. Fitur Sistem
+
+Fitur yang sudah tersedia:
+
+- import CSV dari frontend
+- kosongkan dataset
+- daftar mahasiswa dengan pagination
+- daftar buku dengan pagination
+- daftar transaksi dengan pagination
+- grafik ringkasan transaksi per bulan
+- menjalankan analisis Apriori
+- riwayat analisis
+- hapus run analisis
+- compare dua run
+- tabel rules dengan filter dan pagination
+- detail rule dengan penjelasan support, confidence, dan lift
+- dokumentasi web pada `/dokumentasi`
+
+## 8. Batasan Sistem
+
+- Belum ada login multi-user.
+- Belum ada role-based access control.
+- Belum ada ekspor PDF/Excel dari UI.
+- Kualitas rule sangat bergantung pada kualitas dataset dan threshold.
+- Shared hosting memiliki batas resource, sehingga dataset sangat besar perlu diuji bertahap.
+
+## 9. Kebutuhan Lokal Developer
+
+Jika project dijalankan lokal:
+
+- Node.js untuk frontend
+- Python 3.9+ untuk backend
+- Docker Desktop jika memakai Docker Compose
+- PostgreSQL jika tidak memakai SQLite atau container
+
+Mode paling mudah untuk developer:
 
 ```bat
 docker compose up -d --build
 ```
 
-Command mode server:
+Mode frontend lokal:
 
 ```bat
-docker compose -f docker-compose.server.yml up -d --build
+cd frontend
+npm install
+copy .env.example .env
+npm run dev
 ```
 
-## 11. Batasan Sistem Saat Ini
+Mode backend lokal:
 
-- ID run tidak akan mengisi nomor yang terhapus (normal behavior sequence DB).
-- Kualitas rules sangat bergantung pada kualitas data dan threshold.
-- Dataset besar perlu tuning parameter agar rules tidak kosong atau terlalu banyak.
-
-## 12. Status
-
-Dokumen ini sinkron dengan implementasi yang aktif per update terakhir April 2026.
+```bat
+cd backend
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+```

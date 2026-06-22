@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
@@ -14,7 +18,7 @@ def list_books(
     db: Session = Depends(get_db),
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=20, ge=1, le=100),
-    q: str | None = None,
+    q: Optional[str] = None,
 ) -> PaginatedBooksResponse:
     base_stmt = select(Book)
     count_stmt = select(func.count(Book.id))

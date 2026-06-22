@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 from datetime import datetime
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from collections import Counter
@@ -27,13 +30,17 @@ from app.services.apriori_engine import generate_association_rules, generate_fre
 
 router = APIRouter()
 
+FACULTY_PREFIX = "Fakultas:"
+LEGACY_FACULTY_PREFIX = "Jur" + "usan:"
+BOOK_PREFIX = "Buku:"
+
 
 def _is_department_to_book_rule(antecedent: list[str], consequent: list[str]) -> bool:
     return (
         len(antecedent) == 1
-        and antecedent[0].startswith("Jurusan:")
+        and antecedent[0].startswith((FACULTY_PREFIX, LEGACY_FACULTY_PREFIX))
         and len(consequent) == 1
-        and consequent[0].startswith("Buku:")
+        and consequent[0].startswith(BOOK_PREFIX)
     )
 
 
@@ -99,10 +106,10 @@ def run_analysis(payload: AnalysisRunCreate, db: Session = Depends(get_db)) -> A
     for txn in transactions:
         if not txn.student or not txn.student.department:
             continue
-        items = [f"Jurusan:{txn.student.department.name}"]
+        items = [f"{FACULTY_PREFIX}{txn.student.department.name}"]
         for item in txn.items:
             if item.book:
-                items.append(f"Buku:{item.book.title}")
+                items.append(f"{BOOK_PREFIX}{item.book.title}")
         baskets.append(items)
 
     frequent_itemsets, txn_count = generate_frequent_itemsets(
@@ -168,10 +175,10 @@ def delete_run(run_id: int, db: Session = Depends(get_db)) -> dict[str, str]:
 def get_rules(
     run_id: int,
     db: Session = Depends(get_db),
-    department_id: int | None = None,
-    q: str | None = None,
-    min_confidence: float | None = Query(default=None, ge=0, le=1),
-    min_lift: float | None = Query(default=None, ge=0),
+    department_id: Optional[int] = None,
+    q: Optional[str] = None,
+    min_confidence: Optional[float] = Query(default=None, ge=0, le=1),
+    min_lift: Optional[float] = Query(default=None, ge=0),
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=10, ge=1, le=100),
     sort_by: str = Query(default="lift"),
@@ -199,7 +206,10 @@ def get_rules(
         if not department:
             raise HTTPException(status_code=404, detail="Department not found.")
         conditions.append(
-            AssociationRule.antecedent_text.ilike(f"%Jurusan:{department.name}%")
+            or_(
+                AssociationRule.antecedent_text.ilike(f"%{FACULTY_PREFIX}{department.name}%"),
+                AssociationRule.antecedent_text.ilike(f"%{LEGACY_FACULTY_PREFIX}{department.name}%"),
+            )
         )
 
     sort_map = {
@@ -236,8 +246,10 @@ def get_rules(
     all_run_rules = db.scalars(select(AssociationRule).where(AssociationRule.analysis_run_id == run_id)).all()
     for rr in all_run_rules:
         for item in rr.antecedent_items:
-            if item.startswith("Jurusan:"):
-                dept_counter[item.replace("Jurusan:", "").strip()] += 1
+            if item.startswith(FACULTY_PREFIX):
+                dept_counter[item.replace(FACULTY_PREFIX, "").strip()] += 1
+            elif item.startswith(LEGACY_FACULTY_PREFIX):
+                dept_counter[item.replace(LEGACY_FACULTY_PREFIX, "").strip()] += 1
     if dept_counter:
         dominant_dept = dept_counter.most_common(1)[0][0]
 

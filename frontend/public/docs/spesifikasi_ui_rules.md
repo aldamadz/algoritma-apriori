@@ -1,120 +1,85 @@
-# Spesifikasi UI Rules (React + Shadcn)
+﻿# Spesifikasi UI Hasil Rules
 
-Dokumen ini adalah blueprint implementasi halaman hasil aturan asosiasi agar mudah dipahami user non-teknis.
+Dokumen ini menjelaskan desain halaman hasil association rules yang digunakan pada sistem.
 
 ## 1. Tujuan Halaman
 
-- Menampilkan aturan asosiasi dalam bahasa sederhana (`Jika` -> `Maka`).
-- Memudahkan filter, pencarian, sorting, dan interpretasi rule.
-- Menyediakan detail rule untuk kebutuhan presentasi dan keputusan operasional.
+Halaman `Hasil Analisis Peminjaman` dirancang agar user non-teknis dapat membaca hasil Apriori tanpa harus memahami seluruh proses data mining secara mendalam.
 
-## 2. Struktur Layout Halaman
+Tujuannya:
 
-1. `PageHeader`
-- Judul: `Hasil Analisis Peminjaman`
-- Subjudul: periode + parameter analisis
+- menampilkan rule dalam format `Jika -> Maka`
+- menampilkan support, confidence, dan lift
+- menyediakan filter rule
+- menyediakan dialog detail dengan penjelasan natural
+- mendukung pagination agar data besar tidak membebani browser
 
-2. `SummaryCards` (3 kartu)
-- `Total Rule Valid`
-- `Rule Terkuat (Lift Tertinggi)`
-- `Jurusan Paling Dominan`
+## 2. Komponen UI Utama
 
-3. `FilterBar`
-- Select `Jurusan`
-- Date range `Periode`
-- Input/slider `Min Confidence`
-- Input/slider `Min Lift`
-- Search `kata kunci buku/jurusan`
-- Tombol `Reset Filter`
+### Summary Cards
 
-4. `RulesTable`
-- Tabel utama hasil aturan
-- Sorting + pagination
-- Aksi detail
+Menampilkan ringkasan:
 
-5. `RuleDetailDialog`
-- Modal detail rule dalam bahasa natural
-- Metrik + interpretasi singkat
+- total rule valid
+- rule terkuat berdasarkan lift
+- fakultas dominan
 
-## 3. Komponen React (Disarankan)
+### Filter Rules
 
-- `src/features/rules/components/rules-page.tsx`
-- `src/features/rules/components/rules-summary-cards.tsx`
-- `src/features/rules/components/rules-filter-bar.tsx`
-- `src/features/rules/components/rules-table.tsx`
-- `src/features/rules/components/rule-strength-badge.tsx`
-- `src/features/rules/components/rule-detail-dialog.tsx`
-- `src/features/rules/hooks/use-rules-query.ts`
-- `src/features/rules/types.ts`
+Filter yang tersedia:
 
-## 4. TypeScript Types
+- pencarian fakultas/buku
+- filter fakultas
+- minimum confidence
+- minimum lift
+- reset filter
 
-```ts
-export type AssociationRule = {
-  id: string;
-  antecedent: string[];
-  consequent: string[];
-  support: number;      // 0..1
-  confidence: number;   // 0..1
-  lift: number;         // >= 0
-  supportCount: number;
-};
+Catatan: filter tanggal tidak digunakan pada tabel hasil rules karena periode analisis sudah ditentukan saat run dibuat. Tabel rules fokus menampilkan hasil dari run yang sedang aktif.
 
-export type RulesQueryParams = {
-  analysisRunId: string;
-  departmentId?: string;
-  q?: string;
-  minConfidence?: number;
-  minLift?: number;
-  page?: number;
-  limit?: number;
-  sortBy?: "lift" | "confidence" | "support";
-  sortDir?: "asc" | "desc";
-  periodStart?: string; // YYYY-MM-DD
-  periodEnd?: string;   // YYYY-MM-DD
-};
+### Rules Table
 
-export type RulesApiResponse = {
-  data: AssociationRule[];
-  meta: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-  summary: {
-    totalRules: number;
-    topLiftRule?: AssociationRule;
-    dominantDepartment?: string;
-  };
-};
+Kolom tabel:
+
+- No
+- Jika
+- Maka
+- Support
+- Confidence
+- Lift
+- Kekuatan
+- Aksi
+
+Nomor pada kolom `No` adalah nomor tampilan berdasarkan halaman, bukan ID database.
+
+### Detail Rule
+
+Dialog detail menjelaskan:
+
+- arti support pada rule tersebut
+- arti confidence pada rule tersebut
+- arti lift pada rule tersebut
+- label kekuatan rule
+
+## 3. Interpretasi Kekuatan Rule
+
+Label kekuatan berdasarkan nilai lift:
+
+- `Sangat Kuat`: lift >= 2
+- `Kuat`: 1.2 <= lift < 2
+- `Cukup`: 1 <= lift < 1.2
+- `Lemah`: lift < 1
+
+Lift dipakai karena dapat menunjukkan apakah hubungan lebih kuat dibanding kejadian acak.
+
+## 4. Endpoint yang Dipakai
+
+Rules page memakai endpoint:
+
+```http
+GET /api/analysis/runs/{run_id}/rules
 ```
 
-## 5. Kolom Tabel (UX Non-Teknis)
-
-1. `No`
-2. `Jika` (antecedent)
-3. `Maka` (consequent)
-4. `Support` (format `%`)
-5. `Confidence` (format `%`)
-6. `Lift` (2 desimal)
-7. `Kekuatan Rule` (badge)
-8. `Aksi` (`Detail`)
-
-### Mapping Badge Kekuatan
-
-- `Sangat Kuat`: `lift >= 2`
-- `Kuat`: `1.2 <= lift < 2`
-- `Cukup`: `1 <= lift < 1.2`
-- `Lemah`: `lift < 1`
-
-## 6. Kontrak API (Backend)
-
-### Endpoint
-
-- `GET /api/analysis/runs/:id/rules`
-
-### Query
+Query yang didukung:
 
 - `department_id`
 - `q`
@@ -122,87 +87,54 @@ export type RulesApiResponse = {
 - `min_lift`
 - `page`
 - `limit`
-- `sort_by` (`lift|confidence|support`)
-- `sort_dir` (`asc|desc`)
-- `period_start`
-- `period_end`
+- `sort_by`
+- `sort_dir`
 
-### Response contoh
+Contoh:
+
+```http
+GET /api/analysis/runs/1/rules?min_confidence=0.05&min_lift=1&page=1&limit=10
+```
+
+## 5. Response API
+
+Contoh response:
 
 ```json
 {
   "data": [
     {
-      "id": "rule_001",
-      "antecedent": ["Jurusan TI"],
-      "consequent": ["Buku AI Dasar"],
-      "support": 0.3333,
-      "confidence": 0.875,
-      "lift": 1.92,
+      "id": 1,
+      "antecedent": ["Fakultas:Teknik Informatika"],
+      "consequent": ["Buku:Data Mining"],
+      "support": 0.021,
+      "confidence": 0.37,
+      "lift": 2.4,
       "supportCount": 42
     }
   ],
   "meta": {
     "page": 1,
     "limit": 10,
-    "total": 125,
-    "totalPages": 13
+    "total": 1,
+    "totalPages": 1
   },
   "summary": {
-    "totalRules": 125,
-    "topLiftRule": {
-      "id": "rule_088",
-      "antecedent": ["Jurusan SI"],
-      "consequent": ["Buku Data Mining"],
-      "support": 0.21,
-      "confidence": 0.90,
-      "lift": 2.35,
-      "supportCount": 25
-    },
+    "totalRules": 1,
+    "topLiftRule": null,
     "dominantDepartment": "Teknik Informatika"
   }
 }
 ```
 
-## 7. Formatting Helper (Frontend)
+## 6. Responsivitas
 
-```ts
-export const toPercent = (value: number) => `${(value * 100).toFixed(2)}%`;
-export const toLift = (value: number) => value.toFixed(2);
-```
+Tabel menggunakan horizontal scroll pada layar kecil agar kolom tetap terbaca. Panel dan kartu ringkasan mengikuti layout responsif agar bisa digunakan di desktop maupun mobile.
 
-## 8. State Management
+## 7. Prinsip Tampilan
 
-- Gunakan `TanStack Query` untuk fetch data rules.
-- Gunakan `URLSearchParams` untuk sinkronisasi filter ke URL.
-- Debounce search (`300ms`) supaya query efisien.
-
-## 9. Komponen Shadcn yang Dipakai
-
-- `Card` untuk summary
-- `Data Table` (`Table`) untuk list rules
-- `Select` untuk jurusan dan sort
-- `Input` untuk search
-- `Slider` atau `Input Number` untuk min confidence/lift
-- `Dialog` untuk detail rule
-- `Badge` untuk kekuatan rule
-- `Pagination` untuk navigasi halaman
-
-## 10. Isi Rule Detail Dialog
-
-- Judul: `Detail Aturan`
-- Kalimat natural:
-- `Mahasiswa [Jurusan TI] cenderung meminjam [Buku AI Dasar].`
-- Nilai:
-- Support: `33.33%`
-- Confidence: `87.50%`
-- Lift: `1.92`
-- Interpretasi singkat:
-- `Hubungan ini tergolong kuat dan layak dipertimbangkan untuk rekomendasi pengadaan.`
-
-## 11. Kriteria Selesai UI
-
-- User bisa melihat top rules tanpa paham istilah data mining teknis.
-- User bisa filter aturan berdasarkan jurusan/periode/kekuatan.
-- User bisa membuka detail rule dan memahami maknanya.
-- Tabel responsif untuk desktop dan mobile.
+- Gunakan bahasa sederhana.
+- Hindari menampilkan JSON mentah kepada user.
+- Angka support dan confidence ditampilkan dalam persen.
+- Lift ditampilkan dua angka desimal.
+- Detail rule harus menjelaskan makna angka, bukan hanya menampilkan angka.

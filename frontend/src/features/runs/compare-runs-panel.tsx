@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatRuleItem } from "@/features/rules/utils";
 import type { AnalysisRunOut } from "@/types/api";
 
 type RuleLite = {
@@ -36,7 +37,9 @@ type Props = {
 
 const ruleText = (rule: RuleLite | null): string => {
   if (!rule) return "-";
-  return `Jika [${rule.antecedent.join(", ")}] maka [${rule.consequent.join(", ")}]`;
+  return `Jika [${rule.antecedent.map(formatRuleItem).join(", ")}] maka [${rule.consequent
+    .map(formatRuleItem)
+    .join(", ")}]`;
 };
 
 export function CompareRunsPanel({ runs }: Props) {
@@ -146,7 +149,7 @@ export function CompareRunsPanel({ runs }: Props) {
             <div>Top Rule A: {ruleText(result.aTopRule)}</div>
             <div>Top Rule B: {ruleText(result.bTopRule)}</div>
             <div>
-              Jurusan Dominan A/B: {result.aDominantDept ?? "-"} / {result.bDominantDept ?? "-"}
+              Fakultas Dominan A/B: {result.aDominantDept ?? "-"} / {result.bDominantDept ?? "-"}
             </div>
           </div>
         ) : null}

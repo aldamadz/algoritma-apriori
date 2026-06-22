@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session, joinedload
@@ -14,7 +18,7 @@ def list_students(
     db: Session = Depends(get_db),
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=20, ge=1, le=100),
-    q: str | None = None,
+    q: Optional[str] = None,
 ) -> PaginatedStudentsResponse:
     base_stmt = select(Student).join(Student.department)
     count_stmt = select(func.count(Student.id)).select_from(Student).join(Student.department)

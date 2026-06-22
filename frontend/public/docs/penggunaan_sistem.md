@@ -1,129 +1,195 @@
-# Dokumentasi Penggunaan Sistem Apriori Engine (As-Built)
+﻿# Dokumentasi Penggunaan Sistem Apriori Engine
 
-Dokumen ini menjelaskan penggunaan sistem sesuai implementasi yang aktif saat ini.
+Dokumen ini menjelaskan cara memakai sistem yang sudah berjalan pada production.
 
 ## 1. Akses Sistem
 
-- Aplikasi web: `http://localhost`
-- API docs: `http://localhost:8000/docs`
-- Dokumentasi web: `http://localhost/dokumentasi`
+- Aplikasi web: https://anisaaaaa.sbs
+- Dokumentasi web: https://anisaaaaa.sbs/dokumentasi
+- API docs: https://api.anisaaaaa.sbs/docs
+- Health check API: https://api.anisaaaaa.sbs/api/health
 
-## 2. Menjalankan Sistem
+Jika menjalankan lokal dengan Docker, alamat defaultnya:
 
-```bat
-docker compose up -d --build
-docker compose ps
-```
+- Frontend: http://localhost
+- Backend/API docs: http://localhost:8000/docs
 
-Service yang harus `Up`:
-- `apriori-frontend`
-- `apriori-backend`
-- `apriori-postgres` (mode lokal)
+## 2. Alur Kerja Utama
 
-Jika mode server menggunakan DB existing:
+1. Buka aplikasi web.
+2. Jika ingin memakai dataset baru, klik `Kosongkan Dataset` terlebih dahulu.
+3. Upload file CSV pada panel `Import Dataset CSV`.
+4. Tunggu proses preprocessing dan penyimpanan data selesai.
+5. Isi parameter analisis pada panel `Jalankan Analisis`.
+6. Klik tombol untuk menjalankan Apriori.
+7. Pilih run pada `Riwayat Analisis`.
+8. Baca hasil pada tabel `Hasil Analisis Peminjaman`.
+9. Klik `Detail` pada rule yang ingin dijelaskan.
 
-```bat
-docker compose -f docker-compose.server.yml up -d --build
-```
+## 3. Fungsi Import CSV
 
-## 3. Data CSV Import
+Import CSV digunakan untuk memasukkan data peminjaman ke database. Jadi import bukan hanya membaca file sementara, tetapi menambah data master dan transaksi ke sistem.
+
+Saat import, sistem melakukan:
+
+- validasi file CSV
+- deteksi format kolom
+- normalisasi data fakultas, mahasiswa, buku, dan tanggal
+- pengelompokan baris menjadi transaksi peminjaman
+- penyimpanan data fakultas, mahasiswa, buku, transaksi, dan item buku
+- pengecekan transaksi duplikat berdasarkan mahasiswa, tanggal, tanggal kembali, dan daftar buku
+
+Jika file yang sama diupload lagi, transaksi yang sama akan dilewati agar tidak menggandakan data.
+
+## 4. Format CSV yang Didukung
+
+### 4.1 Format Standar Sistem
 
 Kolom wajib:
+
 - `transaction_id`
 - `student_number`
 - `department_code`
-- `loan_date` (`YYYY-MM-DD`)
+- `loan_date` dengan format `YYYY-MM-DD`
 - `book_isbn`
 
 Kolom opsional:
+
 - `student_name`
 - `department_name`
+- `return_date`
 - `book_title`
 - `book_author`
 - `book_category`
 
-## 4. Generate Dataset Otomatis
+Contoh:
 
-Script:
-- [generate_import_dataset.py](D:\Koding\algoritma apriori\data\generate_import_dataset.py)
+```csv
+transaction_id,student_number,student_name,department_code,department_name,loan_date,return_date,book_isbn,book_title
+TRX001,2024001,Ani,TI,Teknik Informatika,2025-01-10,,BK001,Data Mining
+TRX001,2024001,Ani,TI,Teknik Informatika,2025-01-10,,BK002,Algoritma
+```
+
+### 4.2 Format Data Perpustakaan Riil
+
+Sistem juga mendukung dataset perpustakaan dengan kolom:
+
+- `no_mhs`
+- `nama`
+- `fakultas`
+- `kd_buku`
+- `judul`
+- `tgl_pinjam`
+
+Kolom tambahan yang akan ikut dimanfaatkan bila tersedia:
+
+- `tgl_kembali`
+- `no_barcode`
+- `label1`
+- `label2`
+
+Catatan:
+
+- `fakultas` akan dipakai sebagai nama fakultas.
+- `kd_buku` dipakai sebagai kode buku. Jika kosong, sistem mencoba memakai `no_barcode`.
+- `judul` dipakai sebagai nama buku.
+- Tanggal harus dapat dibaca sebagai `YYYY-MM-DD`.
+
+## 5. Kosongkan Dataset
+
+Tombol `Kosongkan Dataset` digunakan saat operator ingin mengganti dataset sepenuhnya.
+
+Data yang dihapus:
+
+- fakultas
+- mahasiswa
+- buku
+- transaksi peminjaman
+- item transaksi
+- riwayat analisis
+- association rules
+
+Gunakan tombol ini sebelum import dataset baru agar hasil analisis tidak tercampur dengan dataset lama.
+
+## 6. Menjalankan Analisis
+
+Panel `Jalankan Analisis` mengirim data ke backend untuk diproses dengan algoritma Apriori.
+
+Parameter utama:
+
+- `Min Support`: batas minimal kemunculan pola pada seluruh transaksi.
+- `Min Confidence`: batas minimal kepercayaan aturan.
+- `Min Lift`: batas minimal kekuatan asosiasi.
+
+Rekomendasi awal untuk data riil yang besar:
+
+- `min_support`: 0.005 sampai 0.02
+- `min_confidence`: 0.02 sampai 0.10
+- `min_lift`: 1.00 sampai 1.20
+
+Jika rule kosong, turunkan `min_support` atau `min_confidence`.
+
+## 7. Membaca Hasil Rule
+
+Tabel hasil berisi:
+
+- `Jika`: kondisi awal, biasanya fakultas atau buku.
+- `Maka`: rekomendasi atau item yang sering muncul bersama.
+- `Support`: persentase seluruh transaksi yang memuat kombinasi tersebut.
+- `Confidence`: peluang `Maka` terjadi ketika `Jika` terjadi.
+- `Lift`: kekuatan hubungan dibanding kejadian acak.
+- `Kekuatan`: label interpretasi berdasarkan nilai lift.
 
 Contoh:
 
-```bat
-python data\generate_import_dataset.py --transactions 1000
-python data\generate_import_dataset.py --transactions 5000
-```
+Jika `Fakultas:Teknik Informatika` maka `Buku:Data Mining`.
 
-## 5. Alur Penggunaan UI
+Artinya mahasiswa Teknik Informatika memiliki kecenderungan meminjam buku Data Mining berdasarkan pola transaksi yang ada.
 
-1. Import data lewat panel `Import Dataset CSV`.
-2. Jalankan analisis lewat panel `Jalankan Analisis`.
-3. Pilih run aktif pada panel `Riwayat Analisis`.
-4. Lihat hasil rule pada tabel `Hasil Analisis Peminjaman`.
-5. Jika perlu, klik `Detail` untuk membaca rule per baris.
+## 8. Riwayat Analisis
 
-## 6. Riwayat dan Operasional Run
+Setiap kali analisis dijalankan, sistem menyimpan satu run baru.
 
-Fitur pada panel `Riwayat Analisis`:
-- filter run berdasarkan bulan
-- pilih run aktif
-- hapus run
+Fitur riwayat:
 
-Fitur panel `Bandingkan 2 Run`:
-- bandingkan total rules
-- lihat delta rules
-- lihat top rule masing-masing run
-- lihat jurusan dominan masing-masing run
+- memilih run aktif
+- melihat parameter yang dipakai
+- memfilter run berdasarkan bulan pembuatan
+- menghapus run yang tidak diperlukan
+- membandingkan dua run
 
-## 7. Membaca Metrik
+Nomor pada tabel riwayat adalah nomor tampilan, bukan ID database. Jika data dihapus, nomor tampilan akan tetap rapi.
 
-- `Support`: frekuensi rule pada seluruh transaksi.
-- `Confidence`: tingkat keandalan rule.
-- `Lift`: kekuatan asosiasi relatif terhadap baseline.
+## 9. Troubleshooting Penggunaan
 
-Interpretasi lift:
-- `> 1` bermakna
-- `= 1` netral
-- `< 1` lemah
+### Hasil rule kosong
 
-## 8. Parameter Awal yang Disarankan
+Kemungkinan penyebab:
 
-Untuk dataset besar:
-- `min_support = 0.05`
-- `min_confidence = 0.30`
-- `min_lift = 0.80` (saat proses mining)
+- threshold terlalu tinggi
+- dataset terlalu menyebar
+- data fakultas atau buku terlalu banyak variasi
 
-Filter hasil:
-- `min_confidence >= 0.30`
-- `min_lift >= 1.00`
+Solusi:
 
-## 9. Troubleshooting
+- turunkan `min_support`
+- turunkan `min_confidence`
+- pastikan data sudah terimport
+- cek filter pada tabel rules
 
-### 9.1 Hasil rule kosong
+### Import gagal
 
-- Turunkan threshold (support/confidence).
-- Jalankan run baru.
-- Reset filter di tabel rules.
+Cek hal berikut:
 
-### 9.2 Import gagal
+- file harus `.csv`
+- encoding sebaiknya UTF-8
+- nama kolom sesuai format yang didukung
+- tanggal memakai format `YYYY-MM-DD`
 
-- Cek format kolom wajib.
-- Cek encoding UTF-8.
-- Cek format tanggal `YYYY-MM-DD`.
+### Data terlihat dobel
 
-### 9.3 Upload besar kena 413
+Jika pernah import file berulang sebelum fitur skip duplikat aktif, gunakan `Kosongkan Dataset`, lalu import ulang satu kali.
 
-- Sudah disiapkan limit Nginx `client_max_body_size 50M`.
-- Rebuild frontend jika belum aktif:
+### Upload file besar gagal
 
-```bat
-docker compose up -d --build frontend
-```
-
-## 10. Endpoint Operasional
-
-- `POST /api/transactions/import-csv`
-- `POST /api/analysis/run`
-- `GET /api/analysis/runs`
-- `DELETE /api/analysis/runs/{id}`
-- `GET /api/analysis/runs/{id}/rules`
+Pada hosting shared, batas upload dapat dipengaruhi konfigurasi server. Jika file terlalu besar, pecah dataset menjadi beberapa file CSV atau minta penyesuaian limit upload ke provider hosting.

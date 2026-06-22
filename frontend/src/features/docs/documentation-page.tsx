@@ -12,6 +12,8 @@ type DocItem = {
 const DOCS: DocItem[] = [
   { slug: "penggunaan_sistem", title: "Dokumentasi Penggunaan Sistem", file: "penggunaan_sistem.md" },
   { slug: "kebutuhan_sistem", title: "Kebutuhan Sistem Apriori Engine", file: "kebutuhan_sistem.md" },
+  { slug: "deployment_production", title: "Deployment Production", file: "deployment_production.md" },
+  { slug: "api_backend", title: "Dokumentasi API Backend", file: "api_backend.md" },
   { slug: "panduan_client_sidang", title: "Panduan Client dan Sidang", file: "panduan_client_sidang.md" },
   { slug: "spesifikasi_ui_rules", title: "Spesifikasi UI Rules", file: "spesifikasi_ui_rules.md" },
   { slug: "diagram_skripsi", title: "Diagram Skripsi", file: "diagram_skripsi.md" },
@@ -81,9 +83,6 @@ export function DocumentationPage() {
               </li>
             ))}
           </ul>
-          <div className="pt-1 text-slate-600">
-            Akses juga via path alternatif: <code>/docs/&#123;slug&#125;</code>
-          </div>
           <div>
             <a className="text-blue-700 underline" href="/">
               Kembali ke aplikasi
@@ -131,7 +130,7 @@ export function DocumentationPage() {
                   },
                   {
                     title: "Deployment Diagram",
-                    desc: "Topologi deployment (Cloudflare Tunnel, frontend, backend, database).",
+                    desc: "Topologi deployment production: frontend statis, backend FastAPI, dan PostgreSQL hosting.",
                   },
                   {
                     title: "Arsitektur Komponen",

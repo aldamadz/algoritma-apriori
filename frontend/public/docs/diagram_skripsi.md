@@ -1,8 +1,8 @@
-# Diagram Skripsi - Sistem Analisis Pola Peminjaman Perpustakaan
+﻿# Diagram Skripsi - Sistem Analisis Pola Peminjaman Perpustakaan
 
-Dokumen ini berisi kumpulan diagram untuk kebutuhan skripsi berbasis implementasi sistem yang sudah berjalan.
+Dokumen ini berisi diagram yang relevan dengan implementasi sistem Apriori Engine.
 
-## 1. Entity Diagram (Konseptual)
+## 1. Entity Diagram Konseptual
 
 ```mermaid
 erDiagram
@@ -13,7 +13,7 @@ erDiagram
   ANALYSIS_RUN ||--o{ ASSOCIATION_RULE : menghasilkan
 ```
 
-## 2. ERD (Logical + Atribut)
+## 2. ERD Logical
 
 ```mermaid
 erDiagram
@@ -93,70 +93,70 @@ erDiagram
 
 ```mermaid
 flowchart LR
-  A[Admin/Operator] --> UC1[Import CSV Transaksi]
-  A --> UC2[Jalankan Analisis Apriori]
-  A --> UC3[Lihat Riwayat Run]
-  A --> UC4[Lihat Rules]
-  A --> UC5[Bandingkan 2 Run]
-  A --> UC6[Hapus Run]
-  A --> UC7[Lihat Dokumentasi Sistem]
+  A[Admin atau Operator] --> UC1[Import CSV Transaksi]
+  A --> UC2[Kosongkan Dataset]
+  A --> UC3[Jalankan Analisis Apriori]
+  A --> UC4[Lihat Riwayat Run]
+  A --> UC5[Lihat Rules]
+  A --> UC6[Bandingkan 2 Run]
+  A --> UC7[Hapus Run]
+  A --> UC8[Lihat Dokumentasi Sistem]
 ```
 
-## 4. Flowchart Proses Sistem (End-to-End)
+## 4. Flowchart End-to-End
 
 ```mermaid
 flowchart TD
   S([Start]) --> U[Upload CSV]
-  U --> V{Validasi format & kolom}
-  V -- Tidak valid --> E1[Catat error baris]
-  E1 --> U
-  V -- Valid --> M[Simpan master & transaksi]
-  M --> P[Input parameter min_support, min_confidence, min_lift]
-  P --> R[Run Apriori]
-  R --> G[Generate rules + hitung support/confidence/lift]
-  G --> D[Simpan ke analysis_runs & association_rules]
+  U --> V{Format CSV valid?}
+  V -- Tidak --> E[Tampilkan error validasi]
+  E --> U
+  V -- Ya --> P[Preprocessing data]
+  P --> M[Simpan master dan transaksi]
+  M --> A[Input parameter analisis]
+  A --> R[Run Apriori]
+  R --> G[Hitung frequent itemset dan rules]
+  G --> D[Simpan analysis run dan association rules]
   D --> T[Tampilkan rules di UI]
-  T --> C{Perlu compare run?}
-  C -- Ya --> K[Bandingkan Run A vs Run B]
-  C -- Tidak --> X([Selesai])
-  K --> X
+  T --> X([Selesai])
 ```
 
-## 5. Activity Diagram (Jalankan Analisis)
+## 5. Activity Diagram Jalankan Analisis
 
 ```mermaid
 flowchart TD
-  A[User pilih menu Jalankan Analisis] --> B[Isi parameter]
-  B --> C[Klik Run]
-  C --> D[Backend ambil transaksi]
-  D --> E[Bentuk basket Jurusan + Buku]
-  E --> F[Frequent Itemset Mining]
-  F --> G[Association Rule Generation]
-  G --> H[Simpan hasil run]
-  H --> I[UI reload run terbaru]
-  I --> J[Rules ditampilkan]
+  A[User membuka panel Jalankan Analisis] --> B[Isi support confidence lift]
+  B --> C[Klik tombol Run]
+  C --> D[Backend mengambil transaksi]
+  D --> E[Membentuk basket Fakultas dan Buku]
+  E --> F[Apriori mencari frequent itemset]
+  F --> G[Generate association rules]
+  G --> H[Filter rules sesuai threshold]
+  H --> I[Simpan hasil ke database]
+  I --> J[Frontend refresh riwayat dan rules]
 ```
 
-## 6. Sequence Diagram (Import CSV)
+## 6. Sequence Diagram Import CSV
 
 ```mermaid
 sequenceDiagram
   participant U as User
   participant FE as Frontend
   participant API as FastAPI
-  participant DB as PostgreSQL/SQLite
+  participant DB as PostgreSQL
 
-  U->>FE: Pilih file CSV + klik Import
-  FE->>API: POST /api/transactions/import-csv (multipart)
-  API->>API: Validasi kolom + parsing row
-  API->>DB: Upsert Department/Student/Book
-  API->>DB: Insert LoanTransaction + LoanTransactionItem
-  DB-->>API: OK
-  API-->>FE: Summary import + errors
+  U->>FE: Pilih file CSV dan klik Import
+  FE->>API: POST /api/transactions/import-csv
+  API->>API: Validasi kolom dan parsing CSV
+  API->>API: Normalisasi fakultas, mahasiswa, buku, tanggal
+  API->>DB: Upsert departments, students, books
+  API->>DB: Insert loan_transactions dan loan_transaction_items
+  DB-->>API: Data tersimpan
+  API-->>FE: Summary import
   FE-->>U: Tampilkan hasil import
 ```
 
-## 7. Sequence Diagram (Run Apriori)
+## 7. Sequence Diagram Run Apriori
 
 ```mermaid
 sequenceDiagram
@@ -164,49 +164,52 @@ sequenceDiagram
   participant FE as Frontend
   participant API as FastAPI
   participant ENG as Apriori Engine
-  participant DB as PostgreSQL/SQLite
+  participant DB as PostgreSQL
 
-  U->>FE: Klik Run Analysis
+  U->>FE: Klik Jalankan Analisis
   FE->>API: POST /api/analysis/run
-  API->>DB: Ambil transaksi + relasi buku/jurusan
-  API->>ENG: Kirim basket + parameter
-  ENG-->>API: Rules (support, confidence, lift)
-  API->>DB: Simpan analysis_run + association_rules
-  API-->>FE: Response status done
+  API->>DB: Ambil transaksi beserta buku dan fakultas
+  API->>ENG: Kirim basket dan parameter
+  ENG-->>API: Rules support confidence lift
+  API->>DB: Simpan analysis_runs dan association_rules
+  API-->>FE: Status done
   FE->>API: GET /api/analysis/runs/{id}/rules
-  API-->>FE: Data rules + summary
+  API-->>FE: Rules dan summary
 ```
 
-## 8. Deployment Diagram
+## 8. Deployment Diagram Production
 
 ```mermaid
 flowchart LR
-  U[Browser User] --> CF[Cloudflare Tunnel]
-  CF --> NGINX[Nginx Frontend Container :18080]
-  NGINX --> FE[Static React App]
-  NGINX --> API[FastAPI Container :18000 via /api]
-  API --> DB[(PostgreSQL Existing Container)]
+  U[Browser User] --> FE[anisaaaaa.sbs - Static React]
+  FE --> API[api.anisaaaaa.sbs - FastAPI via Passenger WSGI]
+  API --> DB[(PostgreSQL Hosting)]
 ```
 
-## 9. Arsitektur Komponen (Aplikasi)
+## 9. Arsitektur Komponen
 
 ```mermaid
 flowchart LR
   subgraph Frontend
     A1[Import CSV Panel]
     A2[Run Analysis Panel]
-    A3[Runs History Panel]
-    A4[Compare Runs Panel]
-    A5[Rules Table + Filter + Detail]
+    A3[Master Data Panel]
+    A4[Runs History Panel]
+    A5[Compare Runs Panel]
+    A6[Rules Table dan Detail]
+    A7[Documentation Page]
   end
 
   subgraph Backend
     B1[Transactions Route]
     B2[Analysis Route]
-    B3[Apriori Engine Service]
+    B3[Students Route]
+    B4[Books Route]
+    B5[Departments Route]
+    B6[Apriori Engine Service]
   end
 
-  subgraph Data
+  subgraph Database
     C1[(departments)]
     C2[(students)]
     C3[(books)]
@@ -218,10 +221,13 @@ flowchart LR
 
   A1 --> B1
   A2 --> B2
-  A3 --> B2
+  A3 --> B3
+  A3 --> B4
+  A3 --> B1
   A4 --> B2
   A5 --> B2
-  B2 --> B3
+  A6 --> B2
+  B2 --> B6
   B1 --> C1
   B1 --> C2
   B1 --> C3
@@ -231,9 +237,9 @@ flowchart LR
   B2 --> C7
 ```
 
-## 10. Catatan untuk Laporan Skripsi
+## 10. Catatan untuk Laporan
 
-- Gunakan ERD pada Bab Perancangan Basis Data.
-- Gunakan Flowchart/Activity/Sequence pada Bab Perancangan Sistem.
-- Gunakan Deployment dan Arsitektur Komponen pada Bab Implementasi.
-- Jika kampus mewajibkan gambar statis, render Mermaid ke PNG/SVG sebelum dimasukkan ke dokumen.
+- Entity Diagram dan ERD dapat digunakan pada bagian perancangan basis data.
+- Use Case, Activity, Sequence, dan Flowchart dapat digunakan pada bagian perancangan sistem.
+- Deployment Diagram dapat digunakan pada bagian implementasi.
+- Jika laporan membutuhkan gambar statis, gunakan PNG yang sudah tersedia pada halaman dokumentasi.

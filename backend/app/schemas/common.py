@@ -1,4 +1,8 @@
+from __future__ import annotations
+
 from datetime import date, datetime
+from typing import Optional
+
 from pydantic import BaseModel, Field
 
 
@@ -27,7 +31,7 @@ class StudentOut(BaseModel):
     student_number: str
     name: str
     department_id: int
-    department_name: str | None = None
+    department_name: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -54,18 +58,18 @@ class BookOut(BaseModel):
 class LoanTransactionCreate(BaseModel):
     student_id: int
     loan_date: date
-    return_date: date | None = None
+    return_date: Optional[date] = None
     book_ids: list[int] = Field(default_factory=list, min_length=1)
 
 
 class LoanTransactionOut(BaseModel):
     id: int
     student_id: int
-    student_number: str | None = None
-    student_name: str | None = None
-    department_name: str | None = None
+    student_number: Optional[str] = None
+    student_name: Optional[str] = None
+    department_name: Optional[str] = None
     loan_date: date
-    return_date: date | None
+    return_date: Optional[date]
     book_ids: list[int]
     book_titles: list[str] = Field(default_factory=list)
 
@@ -92,8 +96,8 @@ class ClearDatasetResult(BaseModel):
 
 class AnalysisRunCreate(BaseModel):
     run_name: str = "manual-run"
-    period_start: date | None = None
-    period_end: date | None = None
+    period_start: Optional[date] = None
+    period_end: Optional[date] = None
     min_support: float = Field(gt=0, le=1)
     min_confidence: float = Field(gt=0, le=1)
     min_lift: float = Field(ge=0, default=0)
@@ -102,14 +106,14 @@ class AnalysisRunCreate(BaseModel):
 class AnalysisRunOut(BaseModel):
     id: int
     run_name: str
-    period_start: date | None
-    period_end: date | None
+    period_start: Optional[date]
+    period_end: Optional[date]
     min_support: float
     min_confidence: float
     min_lift: float
     status: str
     created_at: datetime
-    finished_at: datetime | None
+    finished_at: Optional[datetime]
 
     class Config:
         from_attributes = True
@@ -134,8 +138,8 @@ class RulesMeta(BaseModel):
 
 class RulesSummary(BaseModel):
     totalRules: int
-    topLiftRule: RuleOut | None = None
-    dominantDepartment: str | None = None
+    topLiftRule: Optional[RuleOut] = None
+    dominantDepartment: Optional[str] = None
 
 
 class RulesResponse(BaseModel):
@@ -165,7 +169,7 @@ class MonthlyTransactionSummary(BaseModel):
 
 
 class TransactionSummaryResponse(BaseModel):
-    firstLoanDate: date | None = None
-    lastLoanDate: date | None = None
+    firstLoanDate: Optional[date] = None
+    lastLoanDate: Optional[date] = None
     totalTransactions: int
     monthly: list[MonthlyTransactionSummary]

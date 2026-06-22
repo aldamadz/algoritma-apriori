@@ -23,7 +23,7 @@ export function RulesSummaryCards({ totalRules, topLiftRule, dominantDepartment 
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>Jurusan Dominan</CardTitle>
+          <CardTitle>Fakultas Dominan</CardTitle>
         </CardHeader>
         <CardContent className="text-sm">{dominantDepartment ?? "-"}</CardContent>
       </Card>

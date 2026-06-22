@@ -1,6 +1,9 @@
+from __future__ import annotations
+
 import csv
 import io
 from datetime import date
+from typing import Optional
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from sqlalchemy import func, or_, select, text
@@ -8,8 +11,6 @@ from sqlalchemy.orm import Session, joinedload
 
 from app.db.session import get_db
 from app.models import (
-    AnalysisRun,
-    AssociationRule,
     Book,
     Department,
     LoanTransaction,
@@ -22,7 +23,6 @@ from app.schemas.common import (
     LoanTransactionCreate,
     LoanTransactionOut,
     PaginatedTransactionsResponse,
-    ResetDataResult,
     RulesMeta,
     TransactionSummaryResponse,
 )
@@ -119,51 +119,12 @@ def get_transaction_summary(db: Session = Depends(get_db)) -> TransactionSummary
     )
 
 
-@router.delete("/all-data", response_model=ResetDataResult)
-def reset_all_data(
-    x_confirm_reset: str | None = Header(default=None),
-    db: Session = Depends(get_db),
-) -> ResetDataResult:
-    if x_confirm_reset != "RESET ALL DATA":
-        raise HTTPException(status_code=400, detail="Reset confirmation is required.")
-
-    counts = {
-        "deletedRules": int(db.scalar(select(func.count(AssociationRule.id))) or 0),
-        "deletedAnalysisRuns": int(db.scalar(select(func.count(AnalysisRun.id))) or 0),
-        "deletedTransactionItems": int(
-            db.scalar(select(func.count(LoanTransactionItem.id))) or 0
-        ),
-        "deletedTransactions": int(db.scalar(select(func.count(LoanTransaction.id))) or 0),
-        "deletedBooks": int(db.scalar(select(func.count(Book.id))) or 0),
-        "deletedStudents": int(db.scalar(select(func.count(Student.id))) or 0),
-        "deletedDepartments": int(db.scalar(select(func.count(Department.id))) or 0),
-    }
-
-    try:
-        for model in (
-            AssociationRule,
-            AnalysisRun,
-            LoanTransactionItem,
-            LoanTransaction,
-            Book,
-            Student,
-            Department,
-        ):
-            db.execute(delete(model))
-        db.commit()
-    except Exception:
-        db.rollback()
-        raise
-
-    return ResetDataResult(**counts)
-
-
 @router.get("", response_model=PaginatedTransactionsResponse)
 def list_transactions(
     db: Session = Depends(get_db),
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=20, ge=1, le=100),
-    q: str | None = None,
+    q: Optional[str] = None,
 ) -> PaginatedTransactionsResponse:
     base_stmt = select(LoanTransaction).join(LoanTransaction.student).join(Student.department)
     count_stmt = select(func.count(func.distinct(LoanTransaction.id))).select_from(LoanTransaction).join(LoanTransaction.student).join(Student.department)
@@ -352,7 +313,7 @@ async def import_csv(file: UploadFile = File(...), db: Session = Depends(get_db)
         except ValueError:
             errors.append(f"transaction_id={txn_id}: invalid loan_date '{loan_date_raw}', expected YYYY-MM-DD")
             continue
-        return_date_value: date | None = None
+        return_date_value: Optional[date] = None
         if return_date_raw:
             try:
                 return_date_value = date.fromisoformat(return_date_raw)

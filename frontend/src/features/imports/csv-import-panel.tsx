@@ -13,9 +13,9 @@ const importSteps = [
   "Validasi file CSV",
   "Membaca isi file",
   "Mendeteksi format kolom dataset",
-  "Preprocessing: normalisasi jurusan, mahasiswa, buku, dan tanggal",
+  "Preprocessing: normalisasi fakultas, mahasiswa, buku, dan tanggal",
   "Mengelompokkan baris menjadi transaksi peminjaman",
-  "Menyimpan data master mahasiswa, jurusan, dan buku",
+  "Menyimpan data master mahasiswa, fakultas, dan buku",
   "Menyimpan transaksi peminjaman dan item buku",
   "Finalisasi hasil import",
 ];
@@ -97,37 +97,6 @@ export function CsvImportPanel({ onImported }: Props) {
     }
   };
 
-  const handleReset = async () => {
-    const confirmed = window.confirm(
-      "Hapus seluruh dataset, transaksi, buku, mahasiswa, fakultas, dan hasil analisis? Tindakan ini tidak dapat dibatalkan.",
-    );
-    if (!confirmed) return;
-
-    setResetting(true);
-    setError("");
-    setResult(null);
-    setResetResult(null);
-    try {
-      const base = import.meta.env.VITE_API_BASE_URL ?? "";
-      const res = await fetch(`${base}/api/transactions/all-data`, {
-        method: "DELETE",
-        headers: { "X-Confirm-Reset": "RESET ALL DATA" },
-      });
-      if (!res.ok) {
-        const text = await res.text();
-        throw new Error(text || `HTTP ${res.status}`);
-      }
-      const json = (await res.json()) as ResetDataResult;
-      setResetResult(json);
-      setFile(null);
-      onImported?.();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Reset data gagal.");
-    } finally {
-      setResetting(false);
-    }
-  };
-
   return (
     <Card>
       <CardHeader>
@@ -172,7 +141,7 @@ export function CsvImportPanel({ onImported }: Props) {
             <div>Transaksi dihapus: {clearResult.deletedTransactions}</div>
             <div>Buku dihapus: {clearResult.deletedBooks}</div>
             <div>Mahasiswa dihapus: {clearResult.deletedStudents}</div>
-            <div>Jurusan dihapus: {clearResult.deletedDepartments}</div>
+            <div>Fakultas dihapus: {clearResult.deletedDepartments}</div>
             <div>Riwayat analisis dihapus: {clearResult.deletedAnalysisRuns}</div>
           </div>
         ) : null}
@@ -181,7 +150,7 @@ export function CsvImportPanel({ onImported }: Props) {
             <div>Total baris: {result.totalRows}</div>
             <div>Transaksi dibuat: {result.createdTransactions}</div>
             <div>Item transaksi dibuat: {result.createdTransactionItems}</div>
-            <div>Department baru: {result.createdDepartments}</div>
+            <div>Fakultas baru: {result.createdDepartments}</div>
             <div>Student baru: {result.createdStudents}</div>
             <div>Buku baru: {result.createdBooks}</div>
             <div>Transaksi duplikat dilewati: {result.skippedDuplicateTransactions}</div>
@@ -191,15 +160,6 @@ export function CsvImportPanel({ onImported }: Props) {
                 Error baris ({result.errors.length}): {result.errors.slice(0, 5).join(" | ")}
               </div>
             ) : null}
-          </div>
-        ) : null}
-        {resetResult ? (
-          <div className="space-y-1 text-sm text-emerald-700">
-            <div>Database berhasil dibersihkan.</div>
-            <div>Transaksi dihapus: {resetResult.deletedTransactions}</div>
-            <div>Item transaksi dihapus: {resetResult.deletedTransactionItems}</div>
-            <div>Hasil analisis dihapus: {resetResult.deletedAnalysisRuns}</div>
-            <div>Rules dihapus: {resetResult.deletedRules}</div>
           </div>
         ) : null}
       </CardContent>

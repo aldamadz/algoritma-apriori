@@ -23,7 +23,7 @@ export function RulesFilterBar({ filters, departments, onChange, onReset }: Prop
 
   return (
     <div className="grid gap-3 rounded-md border p-3 sm:p-4 md:grid-cols-2 xl:grid-cols-5">
-      <Input placeholder="Cari jurusan/buku..." value={filters.q ?? ""} onChange={onQueryText} />
+      <Input placeholder="Cari fakultas/buku..." value={filters.q ?? ""} onChange={onQueryText} />
 
       <select
         className="h-10 rounded-md border border-slate-300 bg-white px-3 text-sm"
@@ -36,7 +36,7 @@ export function RulesFilterBar({ filters, departments, onChange, onReset }: Prop
           })
         }
       >
-        <option value="all">Semua jurusan</option>
+        <option value="all">Semua fakultas</option>
         {departments.map((d) => (
           <option key={d.value} value={d.value}>
             {d.label}

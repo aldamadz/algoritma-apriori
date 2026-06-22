@@ -173,7 +173,7 @@ export function MasterDataPanel() {
                 <TableRow>
                   <TableHead>NIM/NPM</TableHead>
                   <TableHead>Nama</TableHead>
-                  <TableHead>Fakultas/Jurusan</TableHead>
+                  <TableHead>Fakultas</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -220,7 +220,7 @@ export function MasterDataPanel() {
                   <TableHead>Tanggal</TableHead>
                   <TableHead>NIM/NPM</TableHead>
                   <TableHead>Nama</TableHead>
-                  <TableHead>Fakultas/Jurusan</TableHead>
+                  <TableHead>Fakultas</TableHead>
                   <TableHead>Buku Dipinjam</TableHead>
                 </TableRow>
               </TableHeader>
